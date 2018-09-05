@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 
 import { CourseRoutingModule } from './course-routing.module';
 import { CourseComponent } from './course.component';
-import { EventComponent } from './event/event.component'
-import { ScoreComponent } from './score/score.component'
+import { EventComponent } from './event/event.component';
+import { ScoreComponent } from './score/score.component';
 import { UiSwitchModule } from 'ngx-toggle-switch';
 import { JwBootstrapSwitchNg2Module } from 'jw-bootstrap-switch-ng2';
 //
