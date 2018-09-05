@@ -1,0 +1,507 @@
+<nav class="navbar navbar-expand-sm navbar-light bg-light">
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">
+      <li style="font-size:20px">
+        <img src="assets/icon/graduation-cap-primary.png" width="30px" /> {{ ( courseItem | async)?.id }} : {{ ( courseItem
+        | async)?.name }} 
+      </li>
+    </ul>
+
+    <form class="form-inline my-sm-0">
+      <button type="button" class="btn btn-outline-primary" (click)="openEvent(toolBox)">
+        <i class="fa fa-cogs" aria-hidden="true"></i>
+        &nbsp; Tools
+      </button>
+    </form>
+  </div>
+</nav>
+
+<hr>
+
+<nav class="navbar navbar-expand-sm navbar-light bg-light">
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">
+      <div *ngFor="let event of eventList">
+        <li *ngIf="event.fn && event.isClick">
+          <button type="button" class="btn btn-secondary btn-sm" (click)="onClickEvent(event)">
+            {{ event.name }}
+            <!--{{ ( event | async )?.is }}-->
+          </button>
+        </li>
+        <li *ngIf="event.fn && !event.isClick">
+          <button type="button" class="btn btn-light btn-sm" (click)="onClickEvent(event)">
+            {{ event.name }}
+            <!--{{ ( event | async )?.is }}-->
+          </button>
+        </li>
+      </div>
+    </ul>
+
+    <!--เพิ่ม/แก้ไขคะแนน นศ-->
+    <form class="form-inline my-sm-0">
+      <button class="btn btn-outline-warning btn-sm" type="submit" (click)="onClickCreateEventSlot(warningAlert)">
+        <i class="fa fa-plus" aria-hidden="true"></i>
+      </button>
+    </form>
+  </div>
+</nav>
+
+<div class="card">
+  <div class="card-body">
+    <app-event *ngIf="eventParam !== 'score'"></app-event>
+    <app-score *ngIf="eventParam == 'score'"></app-score>
+  </div>
+</div>
+
+<!--
+  XXXXXXXX  XXXXXXX  XX       XX  XXXXXXX  XX       XXXXXXX  XXXXXXXX  XXXXXXX
+     XX     XX       XXX     XXX  XX   XX  XX       XX   XX     XX     XX
+     XX     XXXXXXX  XX X   X XX  XXXXXXX  XX       XXXXXXX     XX     XXXXXXX
+     XX     XX       XX  X X  XX  XX       XX       XX   XX     XX     XX
+     XX     XXXXXXX  XX   X   XX  XX       XXXXXXX  XX   XX     XX     XXXXXXX
+-->
+<!--xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-->
+<!-- เมื่อคลิก Tools -->
+<ng-template #toolBox let-c="close" let-d="dismiss">
+  <!--div class="card-header">
+    <h5 class="modal-title"> เปิดใช้งานฟังก์ชั่นต่างๆ </h5>
+    <hr>
+    <div style="text-align:center">
+      <button type="button" class="btn btn-outline-success" (click)="c('Close click',openEvent(insertStudent))">เพิ่มรายชื่อนักศึกษา</button>
+      &nbsp;
+      <button type="button" class="btn btn-outline-warning" (click)="c('Close click',openLg(updateCourseData))">แก้ไขรายวิชา</button>
+      &nbsp;
+      <button type="button" class="btn btn-outline-danger" (click)="c('Close click')">นำออกข้อมูล</button>
+    </div>
+  </div-->
+  <div class="modal-header">
+    <h5 class="modal-title" id="modal-basic-title">
+      <i class="fa fa-warning" aria-hidden="true"></i>&nbsp;&nbsp;เปิดใช้งานฟังก์ชั่นต่างๆ
+    </h5>
+    <button type="button" class="close" aria-label="Close" (click)="d('Close click')">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="row text-center">
+      <div class="col">
+        <button type="button" class="btn btn-outline-success" (click)="c('Close click',openEvent(insertStudent))">เพิ่มรายชื่อนักศึกษา</button>
+        &nbsp;
+        <button type="button" class="btn btn-outline-warning" (click)="c('Close click',openLg(updateCourseData))">แก้ไขรายวิชา</button>
+        &nbsp;
+        <button type="button" class="btn btn-outline-danger" (click)="c('Close click')">นำออกข้อมูล</button>
+      </div>
+    </div>
+    <br><br>
+    <!-- แก้ไขคะแนน -->
+    <div class="row">
+      <div class="col-2"></div>
+      <div class="col-6 text-primary">
+        <i class="fa fa-pencil-square" aria-hidden="true"></i>&nbsp;&nbsp;ใช้งานการแก้ไขคะแนน
+      </div>
+      <div class="col-4">
+        <ui-switch [(ngModel)]="isFixScore" color="#007bff" switchColor="#007bff" (change)="sendMessageToUpdateScore()"></ui-switch>
+      </div>
+    </div>
+    <!-- แสดงกลุ่มเรียน -->
+    <div class="row">
+      <div class="col-2"></div>
+      <div class="col-6 text-dark">
+        <i class="fa fa-group" aria-hidden="true"></i>&nbsp;&nbsp;แสดงกลุ่มเรียน
+      </div>
+      <div class="col-4">
+        <ui-switch [(ngModel)]="isShowGroup" color="#868e96" switchColor="#868e96" (change)="sendMessageToShowGroup()"></ui-switch>
+      </div>
+    </div>
+    <!-- แสดงเปอร์เซนต์คะแนน -->
+    <div class="row">
+      <div class="col-2"></div>
+      <div class="col-6 text-primary">
+        <i class="fa fa-percent" aria-hidden="true"></i>&nbsp;&nbsp;แสดงเปอร์เซนต์คะแนน
+      </div>
+      <div class="col-4">
+        <ui-switch [(ngModel)]="isShowPercent" color="#007bff" switchColor="#007bff" (change)="sendMessageToShowPercent()"></ui-switch>
+      </div>
+    </div>
+    <!-- แสดงคะแนนรวม -->
+    <!--div class="row">
+      <div class="col-2"></div>
+      <div class="col-6 text-dark">
+        <i class="fa fa-table" aria-hidden="true"></i>&nbsp;&nbsp;แสดงคะแนนรวม
+      </div>
+      <div class="col-4">
+        <ui-switch [(ngModel)]="isShowTotal" color="#868e96" switchColor="#868e96" (change)="sendMessageToShowTotal()"></ui-switch>
+      </div>
+    </div-->
+    <!-- จำนวนครั้งที่ขาดเรียน -->
+    <div class="row">
+      <div class="col-2"></div>
+      <div class="col-6 text-danger">
+        <i class="fa fa-close" aria-hidden="true"></i>&nbsp;&nbsp;จำนวนครั้งที่ขาดเรียน/ส่งงาน
+      </div>
+      <div class="col-4">
+        <ui-switch [(ngModel)]="isShowCountMiss" color="#dc3545" switchColor="#dc3545" (change)="sendMessageToShowCountMiss()"></ui-switch>
+      </div>
+    </div>
+  </div>
+  <div class="row card-footer text-muted">
+    <div class="col text-left">
+      <button type="button" class="btn btn-success" (click)="c('Close click',openEvent(updateEventList))">แก้ไขรายการเก็บคะแนน</button>
+    </div>
+    <div class="col text-right">
+      <button type="button" class="btn btn-primary" (click)="c('Close click')">ปิด</button>
+    </div>
+
+  </div>
+</ng-template>
+<!-- END ToolBox -->
+
+<!--------------------------------------------------------------------------------------------------->
+
+<!-- เพิ่มรายชื่อนักศึกษา -->
+<ng-template #insertStudent let-c="close" let-d="dismiss">
+  <div class="modal-header bg-secondary">
+    <h5 class="modal-title text-light" id="modal-basic-title">
+      <i class="fa fa-warning" aria-hidden="true"></i>&nbsp;&nbsp;เพิ่มรายชื่อนักศึกษา
+    </h5>
+    <button type="button" class="close" aria-label="Close" (click)="d('Close click')">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body text-center">
+    <button type="button" class="btn btn-success" (click)="c('Close click',openEvent(insertStudentString))">
+      <i class="fa fa-keyboard-o" aria-hidden="true"></i>&nbsp;กรอกข้อมูล</button>
+    &nbsp;&nbsp;
+    <button type="button" class="btn btn-danger" (click)="c('Close click',openEvent(insertStudentCsv))">
+      <i class="fa fa-upload" aria-hidden="true"></i>&nbsp;อัพโหลดไฟล์ .csv</button>
+  </div>
+  <!--div class="card-footer text-muted text-right">
+    <button type="button" class="btn btn-primary" (click)="c('Close click')">ตกลง</button>
+  </div-->
+</ng-template>
+<!-- กรอกข้อมูล -->
+<ng-template #insertStudentString let-c="close" let-d="dismiss">
+  <div class="modal-header bg-success">
+    <h5 class="modal-title text-light" id="modal-basic-title">
+      <i class="fa fa-address-card" aria-hidden="true"></i>&nbsp;&nbsp;เพิ่มรายชื่อนักศึกษา โดยการกรอกข้อมูล
+    </h5>
+    <button type="button" class="close" aria-label="Close" (click)="d('Close click')">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <!--div class="card-header bg-success">
+    <h5 class="modal-title">
+      <i class="fa fa-address-card" aria-hidden="true"></i>&nbsp;&nbsp;เพิ่มรายชื่อนักศึกษา โดยการกรอกข้อมูล
+    </h5>
+    <button type="button" class="btn btn-success" (click)="c('Close click')">ปิด</button>
+  </div-->
+  <div class="modal-body text-center">
+    <form autocomplete="off" [formGroup]="insertStudentForm">
+      <fieldset>
+        <div class="input-group" style="padding-bottom: 10px">
+          <div class="input-group-prepend">
+            <div class="input-group-text" id="btnGroupAddon">
+              <i class="material-icons">contact_mail</i>
+            </div>
+          </div>
+          <input type="text" formControlName="id" class="form-control" placeholder="รหัสนักศึกษา" aria-label="Input group example"
+            aria-describedby="btnGroupAddon">
+        </div>
+        <!--///-->
+        <div class="input-group" style="padding-bottom: 20px">
+          <div class="input-group-prepend">
+            <div class="input-group-text" id="btnGroupAddon">
+              <i class="material-icons">vpn_key</i>
+            </div>
+          </div>
+          <input type="password" formControlName="name" class="form-control" placeholder="ชื่อ - นามสกุล" aria-label="Input group example"
+            aria-describedby="btnGroupAddon">
+        </div>
+        <!--///-->
+        <div class="input-group" style="padding-bottom: 10px">
+          <div class="input-group-prepend">
+            <div class="input-group-text" id="btnGroupAddon">
+              <i class="material-icons">assignment_ind</i>
+            </div>
+          </div>
+          <input type="number" placeholder="กลุ่มเรียน" formControlName="group" class="form-control">
+        </div>
+      </fieldset>
+    </form>
+  </div>
+  <div class="card-footer text-muted text-right">
+    <button type="button" class="btn btn-success" (click)="onClickInsertStudentString()">บันทึกรายชื่อ</button>
+  </div>
+</ng-template>
+<!-- อัพโหลด csv -->
+<ng-template #insertStudentCsv let-c="close" let-d="dismiss">
+  <div class="modal-header bg-danger">
+    <p class="modal-title text-light" style="font-size:18px; display:inline">
+      <i class="fa fa-address-card" aria-hidden="true"></i>&nbsp;&nbsp;เพิ่มรายชื่อนักศึกษาโดยการอัพโหลดไฟล์ .csv</p>
+    <button type="button" class="close" aria-label="Close" (click)="d('Close click')">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <!--div class="card-header bg-danger">
+    <p class="modal-title" style="font-size:18px; display:inline">
+      <i class="fa fa-address-card" aria-hidden="true"></i>&nbsp;&nbsp;เพิ่มรายชื่อนักศึกษาโดยการอัพโหลดไฟล์ .csv</p>
+    <p class="text-light" style="font-size:14px">
+      <i class="fa fa-warning text-warning" aria-hidden="true"></i> รองรับเฉพาะไฟล์ UTF-8</p>
+  </div-->
+  <div class="modal-body text-center">
+    <p class="text-danger text-left" style="font-size:14px">
+      <i class="fa fa-warning text-warning" aria-hidden="true"></i> รองรับเฉพาะไฟล์ UTF-8</p>
+    <input type="file" (change)="onFileSelect($event.target.files)"> &nbsp;&nbsp;
+    <button type="submit" class="btn btn-danger text-white" (click)="onUploadcsv()">
+      <i class="fa fa-upload"></i> Upload
+    </button>
+  </div>
+  <div class="card-footer text-muted">
+    <div class="row">
+      <div class="col text-left text-danger">
+        <button type="button" class="btn btn-outline-danger btn-sm">คู่มือเตรียมไฟล์ csv.pdf</button>
+      </div>
+      <div class="col text-right">
+        <!--button type="button" class="btn btn-danger text-right" (click)="c('Close click')">ตกลง</button-->
+      </div>
+    </div>
+  </div>
+</ng-template>
+<!-- END -->
+
+<!--------------------------------------------------------------------------------------------------->
+
+<ng-template #updateCourseData let-c="close" let-d="dismiss">
+  <div class="modal-header bg-warning">
+    <h5 class="modal-title" id="modal-basic-title">
+      <i class="fa fa-warning" aria-hidden="true"></i>&nbsp;&nbsp;แก้ไขรายวิชา
+    </h5>
+    <button type="button" class="close" aria-label="Close" (click)="d('Close click')">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <!--div class="card-header bg-warning">
+    <h5 class="modal-title"><i class="fa fa-pencil-square" aria-hidden="true"></i>&nbsp;&nbsp;แก้ไขรายวิชา</h5>
+    <p class="text-danger">ไม่สามารถแก้ไข รหัสวิชาได้</p>
+  </div-->
+  <div class="modal-body text-center">
+    <p class="text-danger text-left"><i class="fa fa-warning" aria-hidden="true"></i>&nbsp;&nbsp;ไม่สามารถแก้ไข รหัสวิชาได้</p>
+    <form autocomplete="off" [formGroup]="updateCourseDataForm">
+      <fieldset>
+        <div class="row">
+          <div class="col">
+            <p> รายละเอียดวิชา </p>
+            <!-- ชื่อวิชา -->
+            <div class="input-group" style="padding-bottom: 10px">
+              <div class="input-group-prepend">
+                <div class="input-group-text" id="btnGroupAddon">
+                  ชื่อวิชา
+                </div>
+              </div>
+              <input type="text" formControlName="name" class="form-control" placeholder="รหัสนักศึกษา" aria-label="Input group example"
+                aria-describedby="btnGroupAddon">
+            </div>
+            <!-- จำนวนกลุ่มเรียน -->
+            <div class="input-group" style="padding-bottom: 10px">
+              <div class="input-group-prepend">
+                <div class="input-group-text" id="btnGroupAddon">
+                  จำนวนกลุ่มเรียน
+                </div>
+              </div>
+              <input type="Number" formControlName="groupNo" class="form-control" placeholder="ตัวเลขเท่านั้น" aria-label="Input group example"
+                aria-describedby="btnGroupAddon">
+              <!-- valid -->
+            </div>
+            <!-- ปีการศึกษา -->
+            <div class="input-group" style="padding-bottom: 10px">
+              <div class="input-group-prepend">
+                <div class="input-group-text" id="btnGroupAddon">
+                  ปีการศึกษา
+                </div>
+              </div>
+              <input type="text" formControlName="year" class="form-control" placeholder="รหัสนักศึกษา" aria-label="Input group example"
+                aria-describedby="btnGroupAddon">
+            </div>
+            <!-- ภาค -->
+            <div class="input-group" style="padding-bottom: 10px">
+              <div class="input-group-prepend">
+                <div class="input-group-text" id="btnGroupAddon">
+                  ภาคเรียน
+                </div>
+              </div>
+              <input type="text" formControlName="trimester" class="form-control" placeholder="รหัสนักศึกษา" aria-label="Input group example"
+                aria-describedby="btnGroupAddon">
+            </div>
+            <!-- abbreviation -->
+            <div class="input-group" style="padding-bottom: 10px">
+              <div class="input-group-prepend">
+                <div class="input-group-text" id="btnGroupAddon">
+                  อักษรย่อ
+                </div>
+              </div>
+              <input type="text" formControlName="abbreviation" class="form-control" placeholder="อักษรย่อรายวิชา" aria-label="Input group example"
+                aria-describedby="btnGroupAddon">
+            </div>
+          </div>
+
+
+          <!-- ---------------------------------------------- -->
+          <div class="col">
+            <p> % คะแนน</p>
+            <!-- Attendance -->
+            <div *ngIf="updateCourseDataForm.value.percentAtt !== ''" class="input-group" style="padding-bottom: 10px">
+              <div class="input-group-prepend">
+                <div class="input-group-text" id="btnGroupAddon">
+                  Attendance
+                </div>
+              </div>
+              <input type="number" formControlName="percentAtt" class="form-control" placeholder="ตัวเลขเท่านั้น" aria-label="Input group example"
+                aria-describedby="btnGroupAddon">
+            </div>
+            <!-- Quiz -->
+            <div *ngIf="updateCourseDataForm.value.percentQuiz !== ''" class="input-group" style="padding-bottom: 10px">
+              <div class="input-group-prepend">
+                <div class="input-group-text" id="btnGroupAddon">
+                  Quiz
+                </div>
+              </div>
+              <input type="number" formControlName="percentQuiz" class="form-control" placeholder="ตัวเลขเท่านั้น" aria-label="Input group example"
+                aria-describedby="btnGroupAddon">
+            </div>
+            <!-- Homework -->
+            <div *ngIf="updateCourseDataForm.value.percentHw !== ''" class="input-group" style="padding-bottom: 10px">
+              <div class="input-group-prepend">
+                <div class="input-group-text" id="btnGroupAddon">
+                  Homework
+                </div>
+              </div>
+              <input type="number" formControlName="percentHw" class="form-control" placeholder="ตัวเลขเท่านั้น" aria-label="Input group example"
+                aria-describedby="btnGroupAddon">
+            </div>
+            <!-- Assignment -->
+            <div *ngIf="updateCourseDataForm.value.percentAssign !== ''" class="input-group" style="padding-bottom: 10px">
+              <div class="input-group-prepend">
+                <div class="input-group-text" id="btnGroupAddon">
+                  Assignment
+                </div>
+              </div>
+              <input type="number" formControlName="percentAssign" class="form-control" placeholder="ตัวเลขเท่านั้น" aria-label="Input group example"
+                aria-describedby="btnGroupAddon">
+            </div>
+            <!-- Exercise -->
+            <div *ngIf="updateCourseDataForm.value.percentExercise !== ''" class="input-group" style="padding-bottom: 10px">
+              <div class="input-group-prepend">
+                <div class="input-group-text" id="btnGroupAddon">
+                  Exercise
+                </div>
+              </div>
+              <input type="number" formControlName="percentExercise" class="form-control" placeholder="ตัวเลขเท่านั้น" aria-label="Input group example"
+                aria-describedby="btnGroupAddon">
+            </div>
+            <!-- Project -->
+            <div *ngIf="updateCourseDataForm.value.percentProject !== ''" class="input-group" style="padding-bottom: 10px">
+              <div class="input-group-prepend">
+                <div class="input-group-text" id="btnGroupAddon">
+                  Project
+                </div>
+              </div>
+              <input type="number" formControlName="percentProject" class="form-control" placeholder="ตัวเลขเท่านั้น" aria-label="Input group example"
+                aria-describedby="btnGroupAddon">
+            </div>
+            <!-- Lab -->
+            <div *ngIf="updateCourseDataForm.value.percentLab !== ''" class="input-group" style="padding-bottom: 10px">
+              <div class="input-group-prepend">
+                <div class="input-group-text" id="btnGroupAddon">
+                  Lab
+                </div>
+              </div>
+              <input type="number" formControlName="percentLab" class="form-control" placeholder="ตัวเลขเท่านั้น" aria-label="Input group example"
+                aria-describedby="btnGroupAddon">
+            </div>
+          </div>
+        </div>
+      </fieldset>
+    </form>
+  </div>
+  <div class="card-footer text-muted text-right">
+    <button type="button" class="btn btn-warning" (click)="onClickUpdateCourseData()">บันทึกการตั้งค่า</button>
+  </div>
+</ng-template>
+<!-- END -->
+
+<!--------------------------------------------------------------------------------------------------->
+
+<!-- แก้ไข EventList -->
+<ng-template #updateEventList let-c="close" let-d="dismiss">
+  <div class="modal-header bg-info">
+    <h5 class="modal-title" id="modal-basic-title">
+      <i class="fa fa-warning" aria-hidden="true"></i>&nbsp;&nbsp;แก้ไขรายการเก็บคะแนน
+    </h5>
+    <button type="button" class="close" aria-label="Close" (click)="d('Close click')">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <!--div class="card-header bg-success">
+    <p class="modal-title text-light" style="font-size:18px; display:inline">
+      <i class="fa fa-address-card" aria-hidden="true"></i>&nbsp;&nbsp;แก้ไขรายการเก็บคะแนน</p>
+  </div-->
+  <div class="modal-body text-center">
+
+  </div>
+  <div class="card-footer text-muted">
+    <div class="row">
+      <div class="col text-left">
+      </div>
+      <div class="col text-right">
+        <button type="button" class="btn btn-success text-right" (click)="c('Close click')">ตกลง</button>
+      </div>
+    </div>
+  </div>
+</ng-template>
+<!-- END -->
+
+<!-- เพิ่มช่อง -->
+<ng-template #warningAlert let-c="close" let-d="dismiss">
+  <div class="modal-header bg-warning">
+    <h5 class="modal-title" id="modal-basic-title">
+      <i class="fa fa-warning" aria-hidden="true"></i>&nbsp;&nbsp;WARNING
+    </h5>
+    <button type="button" class="close" aria-label="Close" (click)="d('Close click')">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body text-center">
+    {{ warningMessage }}
+    <br>
+    <p *ngIf="uploadFlag">
+      <ngb-progressbar [animated]="true" [striped]="true" [showValue]="true" type="danger" [value]="countUploadStudentProgress"
+        [max]="studentList.length"></ngb-progressbar>
+    </p>
+  </div>
+  <div class="card-footer text-center">
+    <p *ngIf="countUploadStudentProgress !== 0">
+      กรุณารอสักครู่ เมื่อสำเร็จแล้วระบบจะทำการ Reload อีกครั้ง
+    </p>
+    <button *ngIf="countUploadStudentProgres !== studentList.length" type="button" class="btn btn-outline-warning" (click)="letCreateEventSlot()">CREATE</button>
+    <!--button *ngIf="countUploadStudentProgress == studentList.length" type="button" class="btn btn-outline-success" (click)="c('Close click')">ปิด</button-->
+  </div>
+
+</ng-template>
+
+
+<!--div class="input-group" style="padding-bottom: 10px">
+      <div class="input-group-prepend">
+        <div class="input-group-text" id="btnGroupAddon">
+          <i class="material-icons">person</i>
+        </div>
+      </div>
+      <input type="text" [(ngModel)]="eventName" placeholder="EMAIL" aria-label="Input group example">
+    </div-->
+
+
+
+<!--button class="btn btn-outline-primary mb-2 mr-2" (click)="openWindowCustomClass(content)">Modal with window custom class</button>
+<button class="btn btn-outline-primary mb-2 mr-2" (click)="openBackDropCustomClass(content)">Modal with backdrop custom class</button>
+<button class="btn btn-outline-primary mb-2 mr-2" (click)="openSm(content)">Small modal</button>
+<button class="btn btn-outline-primary mb-2 mr-2" (click)="openLg(content)">Large modal</button>
+<button class="btn btn-outline-primary mb-2 mr-2" (click)="openVerticallyCentered(content)">Modal vertically centered</button-->

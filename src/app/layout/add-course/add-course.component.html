@@ -1,0 +1,167 @@
+<html>
+
+<head>
+	<link href="https://fonts.googleapis.com/css?family=Arthiti:300,700" rel="stylesheet">
+</head>
+
+<body>
+	<nav class="navbar navbar-light bg-light">
+		<a class="navbar-brand" href="#">
+			<i class="fa fa-book" aria-hidden="true"></i> <B>สร้างรายวิชาใหม่</B></a>
+	</nav>
+</body>
+
+</html>
+<br>
+
+<div class="container">
+	<form autocomplete="off" novalidate class="login-form" [formGroup]="addCourseForm" (ngSubmit)="onClickSave()">
+		<fieldset>
+			<!-- รหัสวิชา -->
+			<div class="row">
+				<div class="col">
+					<div class="input-group" style="padding-bottom: 10px">
+						<div class="input-group-prepend">
+							<div class="input-group-text" id="btnGroupAddon" style="width:110px">
+								รหัสวิชา
+							</div>
+						</div>
+						<input type="text" formControlName="id" class="form-control" placeholder="รหัสวิชา" aria-label="Input group example" aria-describedby="btnGroupAddon">
+						<!-- Valid -->
+						<div *ngIf="id.value==null" class="input-group-append"></div>
+						<div *ngIf="id.value!=null && id.errors" class="input-group-append">
+							<label class="input-group-text bg-danger text-light" style="width: 40px">
+								<i class="fa fa-close" aria-hidden="true"></i></label>
+						</div>
+						<div *ngIf="id.valid" class="input-group-append">
+							<label class="input-group-text bg-success text-light" style="width: 40px">
+								<i class="fa fa-check" aria-hidden="true"></i></label>
+						</div>
+					</div>
+				</div>
+				<div class="col">
+					<div *ngIf="id.value!=null && id.errors">
+						<label class="text-danger">
+							ตัวเลข 6 ตัว เท่านั้น
+						</label>
+					</div>
+				</div>
+			</div>
+			<!-- ชื่อวิชา -->
+			<div class="row">
+				<div class="col">
+					<div class="input-group" style="padding-bottom: 10px">
+						<div class="input-group-prepend">
+							<div class="input-group-text" id="btnGroupAddon" style="width:110px">
+								รหัสวิชา
+							</div>
+						</div>
+						<input type="text" formControlName="name" class="form-control" placeholder="ชื่อวิชา" aria-label="Input group example" aria-describedby="btnGroupAddon">
+						<!-- Valid -->
+						<div *ngIf="name.value==null" class="input-group-append"></div>
+						<div *ngIf="name.value!=null && name.errors" class="input-group-append">
+							<label class="input-group-text bg-danger text-light" style="width: 40px">
+								<i class="fa fa-close" aria-hidden="true"></i></label>
+						</div>
+						<div *ngIf="name.valid" class="input-group-append">
+							<label class="input-group-text bg-success text-light" style="width: 40px">
+								<i class="fa fa-check" aria-hidden="true"></i></label>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- ปีการศึกษา / ภาค -->
+			<div class="row">
+				<div class="col">
+					<div class="input-group" style="padding-bottom: 10px">
+						<div class="input-group-prepend">
+							<div class="input-group-text" id="btnGroupAddon" style="width:110px">
+								ปีการศึกษา
+							</div>
+						</div>
+						<select formControlName="year" class="form-control">
+							<option>เลือกปีการศึกษา</option>
+							<option *ngFor="let years of yearsList">{{ years }}</option>
+						</select>
+						<!-- Valid -->
+						<div *ngIf="year.value==null" class="input-group-append"></div>
+						<div *ngIf="year.value!=null && year.errors" class="input-group-append">
+							<label class="input-group-text bg-danger text-light" style="width: 40px">
+								<i class="fa fa-close" aria-hidden="true"></i></label>
+						</div>
+						<div *ngIf="year.valid" class="input-group-append">
+							<label class="input-group-text bg-success text-light" style="width: 40px">
+								<i class="fa fa-check" aria-hidden="true"></i></label>
+						</div>
+					</div>
+				</div>
+				<div class="col">
+					<div class="input-group" style="padding-bottom: 10px">
+						<div class="input-group-prepend">
+							<div class="input-group-text" id="btnGroupAddon" style="width:110px">
+								ภาคการศึกษา
+							</div>
+						</div>
+						<select formControlName="trimester" class="form-control">
+							<option>เลือกภาคการศึกษา</option>
+							<option *ngFor="let term of terms">{{ term }}</option>
+						</select>
+						<!-- Valid -->
+						<div *ngIf="trimester.value==null" class="input-group-append"></div>
+						<div *ngIf="trimester.value!=null && trimester.errors" class="input-group-append">
+							<label class="input-group-text bg-danger text-light" style="width: 40px">
+								<i class="fa fa-close" aria-hidden="true"></i></label>
+						</div>
+						<div *ngIf="trimester.valid" class="input-group-append">
+							<label class="input-group-text bg-success text-light" style="width: 40px">
+								<i class="fa fa-check" aria-hidden="true"></i></label>
+						</div>
+						<!--input type="text" formControlName="trimester" class="form-control" placeholder="ภาคการศึกษา" aria-label="Input group example"
+						 aria-describedby="btnGroupAddon"-->
+					</div>
+				</div>
+			</div>
+			<hr>
+			<div class="row">
+				<div class="col">
+					<div class="input-group" style="padding-bottom: 10px">
+						<!--div class="input-group-prepend">
+							<div class="input-group-text" id="btnGroupAddon">
+								รายการเก็บคะแนน
+							</div>
+						</div-->
+						<div class="col form-control navbar navbar-expand-sm">
+							<ul class="navbar-nav mr-auto">
+								รายการเก็บคะแนน&nbsp;
+								<i class="fa fa-question-circle" aria-hidden="true"></i>
+							</ul>
+							<ul class="navbar-nav mr-auto">
+								<div *ngFor="let event of eventList">
+									<li *ngIf="event.isSelected">
+										<button type="button" class="btn btn-secondary btn-sm" (click)="onClickEvent(event)">
+											{{ event.name }}
+										</button>
+										&nbsp;&nbsp;
+									</li>
+									<li *ngIf="!event.isSelected">
+										<button type="button" class="btn btn-outline-secondary btn-sm" (click)="onClickEvent(event)">
+											{{ event.name }}
+										</button>
+										&nbsp;&nbsp;
+									</li>
+								</div>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!--///-->
+		</fieldset>
+		<br><br>
+		<div class="text-right">
+			<button type="submit" class="btn btn-success" [disabled]="!addCourseForm.valid">
+				<i class="fa fa-save" aria-hidden="true"></i> สร้างรายวิชา
+			</button>
+		</div>
+	</form>
+</div>

@@ -1,0 +1,46 @@
+<html>
+
+<head>
+  <link href="https://fonts.googleapis.com/css?family=Arthiti:300,700" rel="stylesheet">
+</head>
+
+<body>
+  <nav class="navbar navbar-light bg-light">
+    <a class="navbar-brand" href="#">
+      <i class="fa fa-trash" aria-hidden="true"></i> <B>ลบรายวิชา</B></a>
+  </nav>
+</body>
+
+</html>
+<br>
+
+<div class="container text-center">
+  <table class="table table-responsive text-dark table-hover">
+    <thead>
+      <tr>
+        <th style="width:70px; text-align: center">#</th>
+        <th style="width:100px; text-align: center">รหัสวิชา</th>
+        <th style="width:370px; text-align: center">ชื่อวิชา</th>
+        <th style="width:100px; text-align: center">จำนวนนักศึกษา</th>
+        <th tyle="width:200px; text-align: center">ลบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let course of courseList; let i = index">
+        <td style="width:70px; text-align: center">{{i+1}}</td>
+        <td style="width:100px; text-align: center">{{course.id}}</td>
+        <td style="width:370px; text-align: center">{{course.name}}</td>
+        <td *ngIf="isEmptyObject(course.students)" style="width:100px; text-align: center">
+          - </td>
+        <td *ngIf="!isEmptyObject(course.students)" style="width:100px; text-align: center">
+          {{ objectKeys(course.students).length}}</td>
+        <td tyle="width:200px; text-align: center">
+          <button type="button" class="btn btn-danger" (click)="onClickDelete(course.id)">
+            <i class="fa fa-trash" aria-hidden="true"></i>&nbsp; ลบรายวิชา
+          </button>
+        </td>
+      </tr>
+
+    </tbody>
+  </table>
+</div>

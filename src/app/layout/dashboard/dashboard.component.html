@@ -1,0 +1,71 @@
+<div [@routerTransition]>
+  <h2 class="text-muted">Dashboard <small>Statistics Overview</small></h2>
+
+  <div *ngFor="let course of courseList; let i = index">
+    <div class="card">
+      <div class="card-header">
+        <div class="row">
+          <div class="col-8 text-left"><b>
+            <p style="display:inline; font-size: 20px">{{ i+1 }}&nbsp;
+                <i class="fa fa-angle-right" aria-hidden="true"></i>&nbsp;
+            </p>
+            <p style="display:inline; font-size: 20px">{{ course.id }} | {{ course.name }}</p></b>
+          </div>
+          <div class="col-4 text-right">
+            <button type="button" class="btn btn-warning" (click)="test(course.students)">
+              <i class="fa fa-arrow-right" aria-hidden="true"></i>&nbsp; คลิกเข้าสู่รายวิชา
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-4">
+            <p>
+              <i class="fa fa-calendar-check-o" aria-hidden="true"></i>&nbsp; ปีการศึกษา : {{course.trimester}}/{{course.year}}
+            </p>
+            <p *ngIf="!isEmptyObject(course.students)">
+              <i class="fa fa-users" aria-hidden="true"></i>&nbsp; จำนวนนักศึกษา : {{ objectKeys(course.students).length
+              }}
+            </p>
+            <p *ngIf="isEmptyObject(course.students)" class="text-danger" style="font-size:14px">
+              <i class="fa fa-users" aria-hidden="true"></i>&nbsp; ยังไม่มีการเพิ่มรายชื่อนักศึกษา
+            </p>
+          </div>
+          <div class="col-8">
+            <ul class="list-group">
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                FEEDBACK
+              </li>
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                {{ ( feedbackListObservable | async ) }}
+              </li>
+              <a href="#" class="btn btn-default btn-block">View All Feedbacks</a>
+            </ul>
+          </div>
+        </div>
+        <div *ngIf="isEmptyObject(course.schedule)" class="text-danger" style="font-size:14px">
+          <i class="fa fa-users" aria-hidden="true"></i>&nbsp; ยังไม่มีข้อมูล Attendance
+        </div>
+        <div *ngIf="!isEmptyObject(course.schedule)"  class="card mb-3">
+          <div class="card-header">
+            Attendance Chart
+          </div>
+          <div class="card-body">
+            <canvas baseChart [colors]="chartColors" [datasets]="chartData[i]" [labels]="chartLabels[i]" [options]="barChartOptions" [legend]="barChartLegend"
+              [chartType]="barChartType" (chartHover)="chartHovered($event)" (chartClick)="chartClicked($event)">
+            </canvas>
+          </div>
+          <!--div class="card-footer">
+            <button class="btn btn-info btn-sm" (click)="randomize()">Update</button>
+          </div-->
+        </div>
+      </div>
+      <div class="card-footer text-muted">
+        ...
+      </div>
+    </div>
+    <br>
+    <hr><br>
+  </div>
+</div>

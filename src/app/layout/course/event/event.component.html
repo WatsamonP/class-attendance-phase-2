@@ -1,0 +1,234 @@
+<ngb-alert *ngIf="!staticAlertClosed" (close)="staticAlertClosed = true">
+  {{ updateScoreString }}
+</ngb-alert>
+
+<ngb-alert *ngIf="!isNotFound" (close)="isNotFound = true">
+  <p *ngIf="scheduleList.length == 0">
+    ไม่มีข้อมูลรายการนี้
+    <button type="button" class="btn btn-outline-primary btn-sm" disabled>
+      <i class="fa fa-cogs" aria-hidden="true"></i>&nbsp; Tools
+    </button>&nbsp; เพื่อแก้ไข
+  </p>
+</ngb-alert>
+
+<div class="row">
+  <div class="col text-left">
+    <p>Show {{numberOfPage}} of {{numberOfAllPageShow}}</p>
+  </div>
+  <div class="col text-right">
+    <ngb-pagination class="d-flex justify-content-end" size="sm" [collectionSize]="numberOfAllPage" [(page)]="numberOfPage" [maxSize]="5"
+      [rotate]="true" [ellipses]="false" [boundaryLinks]="true">
+    </ngb-pagination>
+  </div>
+</div>
+
+<table class="table table-responsive text-dark table-hover">
+  <thead>
+    <tr>
+      <th style="width:70px; text-align: center">#</th>
+      <th style="width:100px; text-align: center">ID</th>
+      <th style="width:250px; text-align: center">ชื่อ-นามสกุล</th>
+      <th *ngIf="isShowGroup" style="width:50px; text-align: center">กลุ่ม</th>
+      <th *ngIf="isShowCountMiss" style="width:50px; text-align: center">
+        <div class="text-danger" style="font-size: 12px">ขาดเรียน</div>
+      </th>
+      <ng-template ngFor let-schedule [ngForOf]="scheduleList" let-i="index">
+        <!--แสดง หน้าละ 5 เริ่มจาก หน้าสุดท้าย -->
+        <th *ngIf="((numberOfPage-1) <= i/5) && (i/5 < numberOfPage)" style="width:80px ;text-align: center">
+          <button type="button" class="btn btn-light" placement="top">
+            {{ i+1 }}
+          </button>
+        </th>
+      </ng-template>
+      <th *ngIf="isShowPercent && selectedEvent == 'attendance'" style="width:70px; text-align: center">
+        <div class="text-primary" style="font-size: 14px"> {{ percentageConfig.percentAtt }} % </div>
+      </th>
+      <th *ngIf="isShowPercent && selectedEvent == 'quiz'" style="width:70px; text-align: center">
+        <div class="text-primary" style="font-size: 14px"> {{ percentageConfig.percentQuiz }} % </div>
+      </th>
+      <th *ngIf="isShowPercent && selectedEvent == 'hw'" style="width:70px; text-align: center">
+        <div class="text-primary" style="font-size: 14px"> {{ percentageConfig.percentHw }} % </div>
+      </th>
+      <th *ngIf="isShowPercent && selectedEvent == 'lab'" style="width:70px; text-align: center">
+        <div class="text-primary" style="font-size: 14px"> {{ percentageConfig.percentLab }} % </div>
+      </th>
+      <th *ngIf="isShowPercent && selectedEvent == 'assignment'" style="width:70px; text-align: center">
+        <div class="text-primary" style="font-size: 14px"> {{ percentageConfig.percentAssign }} % </div>
+      </th>
+      <th *ngIf="isShowPercent && selectedEvent == 'project'" style="width:70px; text-align: center">
+        <div class="text-primary" style="font-size: 14px"> {{ percentageConfig.percentProject }} % </div>
+      </th>
+      <th *ngIf="isShowPercent && selectedEvent == 'exercise'" style="width:70px; text-align: center">
+        <div class="text-primary" style="font-size: 14px"> {{ percentageConfig.percentExercise }} % </div>
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let student of studentList; let j = index;">
+      <th scope="row" style="width:70px; text-align: center">
+        <i class="fa fa-trash-o" (click)="onDeleteStudent(student.id)"></i>&nbsp;{{j+1}}
+      </th>
+      <td style="width:100px; text-align: center">{{student.id}}</td>
+      <td style="width:250px; text-align: center">{{student.name}}</td>
+      <td *ngIf="isShowGroup" style="width:50px; text-align: center">{{student.group}}</td>
+      <td *ngIf="isShowCountMiss" style="width:50px; text-align: center">{{missedClassCount[j]}}</td>
+      <!--ng-ng-container *ngFor="let miss of missedClassCount" *ngIf="isShowCountMiss" >
+        <td  style="width:50px; text-align: center">
+          {{ miss }}
+        </td>
+      </ng-container-->
+      <!-------------------------------------------------------------------------------------->
+      <!-- Schedule Result-->
+      <ng-container *ngFor="let key of objectKeys(student[selectedEvent]); let k = index">
+        <td *ngIf="((numberOfPage-1) <= k/5) && (k/5 < numberOfPage) then normalScore">
+        </td>
+        <!-- Normal Score for !Attendance-->
+        <ng-template #normalScore>
+          <td *ngIf="(student[selectedEvent][key].score >= 1) && (selectedEvent!=='attendance'); else ontimeScore" class="write" style="width:80px ;text-align: center">
+            <form *ngIf="isFixScore" autocomplete="off" novalidate [formGroup]="changeScoreForm">
+              <fieldset [disabled]="formDisabled">
+                <input type="text" class="form-control text-center" formControlName="changeScore" placeholder="{{ student[selectedEvent][key].score }}"
+                  (keyup.enter)="onChangeScore(student,key,k)">
+              </fieldset>
+            </form>
+            <div *ngIf="!isFixScore">{{ student[selectedEvent][key].score }}</div>
+          </td>
+        </ng-template>
+        <!--template show ontimeScore if Attendance-->
+        <ng-template #ontimeScore>
+          <td *ngIf="(student[selectedEvent][key].score >= 1) && (selectedEvent=='attendance'); else lateScore" class="green" style="width:80px ;text-align: center">
+            <form *ngIf="isFixScore" autocomplete="off" novalidate [formGroup]="changeScoreForm">
+              <fieldset [disabled]="formDisabled">
+                <input type="text" class="form-control text-center" formControlName="changeScore" placeholder="{{ student[selectedEvent][key].score }}"
+                  (keyup.enter)="onChangeScore(student,key,k)">
+              </fieldset>
+            </form>
+            <div *ngIf="!isFixScore">{{ student[selectedEvent][key].score }}</div>
+          </td>
+        </ng-template>
+        <!--template show lateScore if Attendance-->
+        <ng-template #lateScore>
+          <td *ngIf="(student[selectedEvent][key].score == 0.5) && (selectedEvent=='attendance'); else missScore" class="yell" style="width:80px ;text-align: center">
+            <form *ngIf="isFixScore" autocomplete="off" novalidate [formGroup]="changeScoreForm">
+              <fieldset [disabled]="formDisabled">
+                <input type="text" class="form-control text-center" formControlName="changeScore" placeholder="{{ student[selectedEvent][key].score }}"
+                  (keyup.enter)="onChangeScore(student,key,k)">
+              </fieldset>
+            </form>
+            <div *ngIf="!isFixScore">{{ student[selectedEvent][key].score }}</div>
+          </td>
+        </ng-template>
+        <!--template show score = 0-->
+        <ng-template #missScore>
+          <td *ngIf="student[selectedEvent][key].score == 0;" class="red text-danger" style="width:80px ;text-align: center">
+            <form *ngIf="isFixScore" autocomplete="off" novalidate [formGroup]="changeScoreForm">
+              <fieldset [disabled]="formDisabled">
+                <input type="text" class="form-control text-center" formControlName="changeScore" placeholder="{{ student[selectedEvent][key].score }}"
+                  (keyup.enter)="onChangeScore(student,key,k)">
+              </fieldset>
+            </form>
+            <div *ngIf="!isFixScore">{{ student[selectedEvent][key].score }}</div>
+          </td>
+        </ng-template>
+      </ng-container>
+      <!-- END Schedule Result-->
+      <td *ngIf="isShowPercent" style="width:70px; text-align: center">{{ percentageScore[j] | number : '1.2-2' }}</td>
+    </tr>
+
+    <!--  XXXXXXXX  XXXXXXX  XXXXXXXX  XXXXXXX  XX
+         XX     XX   XX     XX     XX   XX  XX
+         XX     XX   XX     XX     XXXXXXX  XX
+         XX     XX   XX     XX     XX   XX  XX
+         XX     XXXXXXX     XX     XX   XX  XXXXXXX
+-->
+    <!--Total Row------------------------------------------------------------------------>
+    <!-- IF !ATTENFANCE-->
+    <tr *ngIf="selectedEvent !== 'attendance'" class="bg-light">
+      <td colspan="3" style="width:70px; text-align: center">Total</td>
+      <td *ngIf="isShowGroup"></td>
+      <td *ngIf="isShowCountMiss"></td>
+      <ng-template ngFor let-schedule [ngForOf]="scheduleList" let-i="index">
+        <td *ngIf="((numberOfPage-1) <= i/5) && (i/5 < numberOfPage)" style="width:50px ;text-align: center">
+          {{ schedule.count }}
+        </td>
+      </ng-template>
+      <td *ngIf="isShowPercent"></td>
+    </tr>
+    <!-- END IF !ATTENFANCE-->
+    <!----------------------------------------------------------------------------------->
+    <!--IF ATTENDANCE [[ ON TIME ]]-->
+    <tr *ngIf="selectedEvent=='attendance'" class="green">
+      <td colspan="3" style="width:70px; text-align: right">มาเรียนตรงเวลา</td>
+      <td *ngIf="isShowGroup"></td>
+      <td *ngIf="isShowCountMiss"></td>
+      <ng-template ngFor let-schedule [ngForOf]="scheduleList" let-i="index">
+        <td *ngIf="((numberOfPage-1) <= i/5) && (i/5 < numberOfPage)" style="width:50px ;text-align: center">
+          {{ schedule.countOnTime }}
+        </td>
+      </ng-template>
+      <td *ngIf="isShowPercent"></td>
+    </tr>
+    <!--IF ATTENDANCE [[ LATE ]]-->
+    <tr *ngIf="selectedEvent=='attendance'" class="yell">
+      <td colspan="3" style="width:70px; text-align: right">มาเรียนสาย</td>
+      <td *ngIf="isShowGroup"></td>
+      <td *ngIf="isShowCountMiss"></td>
+      <ng-template ngFor let-schedule [ngForOf]="scheduleList" let-i="index">
+        <td *ngIf="((numberOfPage-1) <= i/5) && (i/5 < numberOfPage)" style="width:50px ;text-align: center">
+          {{ schedule.countLate }}
+        </td>
+      </ng-template>
+      <td *ngIf="isShowPercent"></td>
+    </tr>
+    <!--IF ATTENDANCE [[ MISS CLASS ]]-->
+    <tr *ngIf="selectedEvent=='attendance'" class="red">
+      <td colspan="3" style="width:70px; text-align: right">ขาดเรียน</td>
+      <td *ngIf="isShowGroup"></td>
+      <td *ngIf="isShowCountMiss"></td>
+      <ng-template ngFor let-schedule [ngForOf]="scheduleList" let-i="index">
+        <td *ngIf="((numberOfPage-1) <= i/5) && (i/5 < numberOfPage)" style="width:50px ;text-align: center">
+          {{ schedule.countMiss }}
+        </td>
+      </ng-template>
+      <td *ngIf="isShowPercent"></td>
+    </tr>
+    <!--IF ATTENDANCE [[ LEAVE ]]-->
+    <tr *ngIf="selectedEvent=='attendance'" class="yell">
+      <td colspan="3" style="width:70px; text-align: right">ลา</td>
+      <td *ngIf="isShowGroup"></td>
+      <td *ngIf="isShowCountMiss"></td>
+      <ng-template ngFor let-schedule [ngForOf]="scheduleList" let-i="index">
+        <td *ngIf="((numberOfPage-1) <= i/5) && (i/5 < numberOfPage)" style="width:50px ;text-align: center">
+          {{ schedule.countLeave }}
+        </td>
+      </ng-template>
+      <td *ngIf="isShowPercent"></td>
+    </tr>
+    <!-- END IF ATTENFANCE-->
+  </tbody>
+</table>
+<!-- TABLE-->
+<!----------------------------------------------------------------------------------->
+
+<!-- Popup ถามว่าต้องการบันทึกคะแนนซ้ำไหม-->
+<ng-template #duplicateEventScore let-c="close" let-d="dismiss">
+  <div class="modal-header bg-warning">
+    <h5 class="modal-title" id="modal-basic-title">
+      <i class="fa fa-warning" aria-hidden="true"></i>&nbsp;&nbsp;WARNING
+    </h5>
+    <button type="button" class="close" aria-label="Close" (click)="d('Close click')">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body text-center">
+    ต้องการแก้ไขคะแนน ?
+  </div>
+  <div class="modal-footer row">
+    <div class="col text-left">
+      <button type="button" class="btn btn-outline-warning" (click)="d('Close click')">ยกเลิก</button>
+    </div>
+    <div class="col text-right">
+      <button type="button" class="btn btn-warning" (click)="c('Close click')">ตกลง</button>
+    </div>
+  </div>
+</ng-template>
