@@ -3,12 +3,12 @@
     <ul class="navbar-nav mr-auto">
       <li style="font-size:20px">
         <img src="assets/icon/graduation-cap-primary.png" width="30px" /> {{ ( courseItem | async)?.id }} : {{ ( courseItem
-        | async)?.name }} 
+        | async)?.name }}
       </li>
     </ul>
 
     <form class="form-inline my-sm-0">
-      <button type="button" class="btn btn-outline-primary" (click)="openEvent(toolBox)">
+      <button type="button" class="btn btn-outline-primary" (click)="openTools(toolBox)">
         <i class="fa fa-cogs" aria-hidden="true"></i>
         &nbsp; Tools
       </button>
@@ -23,7 +23,7 @@
     <ul class="navbar-nav mr-auto">
       <div *ngFor="let event of eventList">
         <li *ngIf="event.fn && event.isClick">
-          <button type="button" class="btn btn-secondary btn-sm" (click)="onClickEvent(event)">
+          <button type="button" class="btn btn-primary btn-sm" (click)="onClickEvent(event)">
             {{ event.name }}
             <!--{{ ( event | async )?.is }}-->
           </button>
@@ -39,7 +39,7 @@
 
     <!--เพิ่ม/แก้ไขคะแนน นศ-->
     <form class="form-inline my-sm-0">
-      <button class="btn btn-outline-warning btn-sm" type="submit" (click)="onClickCreateEventSlot(warningAlert)">
+      <button class="btn btn-outline-warning btn-sm" type="button" (click)="onClickCreateEventSlot(warningAlert)">
         <i class="fa fa-plus" aria-hidden="true"></i>
       </button>
     </form>
@@ -94,7 +94,7 @@
     </div>
     <br><br>
     <!-- แก้ไขคะแนน -->
-    <div class="row">
+    <!--div class="row">
       <div class="col-2"></div>
       <div class="col-6 text-primary">
         <i class="fa fa-pencil-square" aria-hidden="true"></i>&nbsp;&nbsp;ใช้งานการแก้ไขคะแนน
@@ -102,7 +102,7 @@
       <div class="col-4">
         <ui-switch [(ngModel)]="isFixScore" color="#007bff" switchColor="#007bff" (change)="sendMessageToUpdateScore()"></ui-switch>
       </div>
-    </div>
+    </div-->
     <!-- แสดงกลุ่มเรียน -->
     <div class="row">
       <div class="col-2"></div>
@@ -274,7 +274,7 @@
 <ng-template #updateCourseData let-c="close" let-d="dismiss">
   <div class="modal-header bg-warning">
     <h5 class="modal-title" id="modal-basic-title">
-      <i class="fa fa-warning" aria-hidden="true"></i>&nbsp;&nbsp;แก้ไขรายวิชา
+      <i class="fa fa-warning" aria-hidden="true"></i>&nbsp;&nbsp;แก้ไขรายวิชา {{ ( courseItem | async )?.id }}
     </h5>
     <button type="button" class="close" aria-label="Close" (click)="d('Close click')">
       <span aria-hidden="true">&times;</span>
@@ -298,44 +298,42 @@
                   ชื่อวิชา
                 </div>
               </div>
-              <input type="text" formControlName="name" class="form-control" placeholder="รหัสนักศึกษา" aria-label="Input group example"
-                aria-describedby="btnGroupAddon">
+              <input type="text" formControlName="name" class="form-control" placeholder="ชื่อวิชา" aria-label="Input group example" aria-describedby="btnGroupAddon">
             </div>
             <!-- จำนวนกลุ่มเรียน -->
-            <div class="input-group" style="padding-bottom: 10px">
+            <!--div class="input-group" style="padding-bottom: 10px">
               <div class="input-group-prepend">
-                <div class="input-group-text" id="btnGroupAddon">
+                <div class="input-group-text" id="btnGroupAddon" style="width:125px">
                   จำนวนกลุ่มเรียน
                 </div>
               </div>
               <input type="Number" formControlName="groupNo" class="form-control" placeholder="ตัวเลขเท่านั้น" aria-label="Input group example"
                 aria-describedby="btnGroupAddon">
-              <!-- valid -->
-            </div>
+            </div-->
             <!-- ปีการศึกษา -->
             <div class="input-group" style="padding-bottom: 10px">
               <div class="input-group-prepend">
-                <div class="input-group-text" id="btnGroupAddon">
+                <div class="input-group-text" id="btnGroupAddon" style="width:125px">
                   ปีการศึกษา
                 </div>
               </div>
-              <input type="text" formControlName="year" class="form-control" placeholder="รหัสนักศึกษา" aria-label="Input group example"
+              <input type="text" formControlName="year" class="form-control" placeholder="ปีการศึกษา" aria-label="Input group example"
                 aria-describedby="btnGroupAddon">
             </div>
             <!-- ภาค -->
             <div class="input-group" style="padding-bottom: 10px">
               <div class="input-group-prepend">
-                <div class="input-group-text" id="btnGroupAddon">
+                <div class="input-group-text" id="btnGroupAddon" style="width:125px">
                   ภาคเรียน
                 </div>
               </div>
-              <input type="text" formControlName="trimester" class="form-control" placeholder="รหัสนักศึกษา" aria-label="Input group example"
+              <input type="text" formControlName="trimester" class="form-control" placeholder="ภาคเรียน" aria-label="Input group example"
                 aria-describedby="btnGroupAddon">
             </div>
             <!-- abbreviation -->
             <div class="input-group" style="padding-bottom: 10px">
               <div class="input-group-prepend">
-                <div class="input-group-text" id="btnGroupAddon">
+                <div class="input-group-text" id="btnGroupAddon" style="width:125px">
                   อักษรย่อ
                 </div>
               </div>
@@ -349,17 +347,19 @@
           <div class="col">
             <p> % คะแนน</p>
             <!-- Attendance -->
-            <div *ngIf="updateCourseDataForm.value.percentAtt !== ''" class="input-group" style="padding-bottom: 10px">
-              <div class="input-group-prepend">
-                <div class="input-group-text" id="btnGroupAddon">
-                  Attendance
+            <div *ngFor="let dE of dynamicEvent">
+              <div class="input-group" style="padding-bottom: 10px">
+                <div class="input-group-prepend">
+                  <div class="input-group-text" id="btnGroupAddon" style="width:140px">
+                    {{dE.name}}
+                  </div>
                 </div>
+                <input type="number" formControlName="{{dE.percentKey}}" class="form-control" placeholder="ตัวเลขเท่านั้น" aria-label="Input group example"
+                    aria-describedby="btnGroupAddon">
               </div>
-              <input type="number" formControlName="percentAtt" class="form-control" placeholder="ตัวเลขเท่านั้น" aria-label="Input group example"
-                aria-describedby="btnGroupAddon">
             </div>
             <!-- Quiz -->
-            <div *ngIf="updateCourseDataForm.value.percentQuiz !== ''" class="input-group" style="padding-bottom: 10px">
+            <!--div *ngIf="updateCourseDataForm.value.percentQuiz !== ''" class="input-group" style="padding-bottom: 10px">
               <div class="input-group-prepend">
                 <div class="input-group-text" id="btnGroupAddon">
                   Quiz
@@ -367,9 +367,9 @@
               </div>
               <input type="number" formControlName="percentQuiz" class="form-control" placeholder="ตัวเลขเท่านั้น" aria-label="Input group example"
                 aria-describedby="btnGroupAddon">
-            </div>
+            </div-->
             <!-- Homework -->
-            <div *ngIf="updateCourseDataForm.value.percentHw !== ''" class="input-group" style="padding-bottom: 10px">
+            <!--div *ngIf="updateCourseDataForm.value.percentHw !== ''" class="input-group" style="padding-bottom: 10px">
               <div class="input-group-prepend">
                 <div class="input-group-text" id="btnGroupAddon">
                   Homework
@@ -377,19 +377,19 @@
               </div>
               <input type="number" formControlName="percentHw" class="form-control" placeholder="ตัวเลขเท่านั้น" aria-label="Input group example"
                 aria-describedby="btnGroupAddon">
-            </div>
+            </div-->
             <!-- Assignment -->
-            <div *ngIf="updateCourseDataForm.value.percentAssign !== ''" class="input-group" style="padding-bottom: 10px">
+            <!--div *ngIf="updateCourseDataForm.value.percentAssignment !== ''" class="input-group" style="padding-bottom: 10px">
               <div class="input-group-prepend">
                 <div class="input-group-text" id="btnGroupAddon">
                   Assignment
                 </div>
               </div>
-              <input type="number" formControlName="percentAssign" class="form-control" placeholder="ตัวเลขเท่านั้น" aria-label="Input group example"
+              <input type="number" formControlName="percentAssignment" class="form-control" placeholder="ตัวเลขเท่านั้น" aria-label="Input group example"
                 aria-describedby="btnGroupAddon">
-            </div>
+            </div-->
             <!-- Exercise -->
-            <div *ngIf="updateCourseDataForm.value.percentExercise !== ''" class="input-group" style="padding-bottom: 10px">
+            <!--div *ngIf="updateCourseDataForm.value.percentExercise !== ''" class="input-group" style="padding-bottom: 10px">
               <div class="input-group-prepend">
                 <div class="input-group-text" id="btnGroupAddon">
                   Exercise
@@ -397,9 +397,9 @@
               </div>
               <input type="number" formControlName="percentExercise" class="form-control" placeholder="ตัวเลขเท่านั้น" aria-label="Input group example"
                 aria-describedby="btnGroupAddon">
-            </div>
+            </div-->
             <!-- Project -->
-            <div *ngIf="updateCourseDataForm.value.percentProject !== ''" class="input-group" style="padding-bottom: 10px">
+            <!--div *ngIf="updateCourseDataForm.value.percentProject !== ''" class="input-group" style="padding-bottom: 10px">
               <div class="input-group-prepend">
                 <div class="input-group-text" id="btnGroupAddon">
                   Project
@@ -407,9 +407,9 @@
               </div>
               <input type="number" formControlName="percentProject" class="form-control" placeholder="ตัวเลขเท่านั้น" aria-label="Input group example"
                 aria-describedby="btnGroupAddon">
-            </div>
+            </div-->
             <!-- Lab -->
-            <div *ngIf="updateCourseDataForm.value.percentLab !== ''" class="input-group" style="padding-bottom: 10px">
+            <!--div *ngIf="updateCourseDataForm.value.percentLab !== ''" class="input-group" style="padding-bottom: 10px">
               <div class="input-group-prepend">
                 <div class="input-group-text" id="btnGroupAddon">
                   Lab
@@ -417,13 +417,14 @@
               </div>
               <input type="number" formControlName="percentLab" class="form-control" placeholder="ตัวเลขเท่านั้น" aria-label="Input group example"
                 aria-describedby="btnGroupAddon">
-            </div>
+            </div-->
           </div>
         </div>
       </fieldset>
     </form>
   </div>
   <div class="card-footer text-muted text-right">
+    <button type="button" class="btn btn-warning" (click)="deleteCouse()">ลบ</button>
     <button type="button" class="btn btn-warning" (click)="onClickUpdateCourseData()">บันทึกการตั้งค่า</button>
   </div>
 </ng-template>
@@ -472,17 +473,35 @@
   </div>
   <div class="modal-body text-center">
     {{ warningMessage }}
-    <br>
-    <p *ngIf="uploadFlag">
-      <ngb-progressbar [animated]="true" [striped]="true" [showValue]="true" type="danger" [value]="countUploadStudentProgress"
-        [max]="studentList.length"></ngb-progressbar>
-    </p>
+    <hr>
+
+    <form *ngIf="uploadFlag && eventParam !== 'attendance'" autocomplete="off" [formGroup]="insertSchedule">
+      <div class="row">
+        <div class="col">
+          <div class="input-group" style="padding-bottom: 10px">
+            <div class="input-group-prepend">
+              <div class="input-group-text" id="btnGroupAddon">
+                กำหนดคะแนนเต็ม
+              </div>
+            </div>
+            <input type="text" formControlName="totalScore" class="form-control" placeholder="คะแนนเต็ม" aria-label="Input group example"
+              aria-describedby="btnGroupAddon">
+          </div>
+        </div>
+      </div>
+      <br>
+    </form>
+
+    <ngb-progressbar *ngIf="uploadFlag" [animated]="true" [striped]="true" [showValue]="true" type="danger" [value]="countUploadStudentProgress"
+      [max]="studentList.length"></ngb-progressbar>
+
   </div>
-  <div class="card-footer text-center">
+  <div *ngIf="uploadFlag" class="card-footer text-center">
     <p *ngIf="countUploadStudentProgress !== 0">
       กรุณารอสักครู่ เมื่อสำเร็จแล้วระบบจะทำการ Reload อีกครั้ง
     </p>
     <button *ngIf="countUploadStudentProgres !== studentList.length" type="button" class="btn btn-outline-warning" (click)="letCreateEventSlot()">CREATE</button>
+
     <!--button *ngIf="countUploadStudentProgress == studentList.length" type="button" class="btn btn-outline-success" (click)="c('Close click')">ปิด</button-->
   </div>
 

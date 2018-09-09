@@ -9,6 +9,7 @@ import { SidebarComponent } from './components/sidebar/sidebar.component';
 import { HeaderComponent } from './components/header/header.component';
 import { ChartsModule as Ng2Charts } from 'ng2-charts';
 import { MessageService } from '../shared/services/messageService';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
     imports: [
@@ -16,7 +17,9 @@ import { MessageService } from '../shared/services/messageService';
         LayoutRoutingModule,
         TranslateModule,
         NgbDropdownModule.forRoot(),
-        Ng2Charts
+        Ng2Charts,
+        FormsModule,
+        ReactiveFormsModule
     ],
     declarations: [LayoutComponent, SidebarComponent, HeaderComponent],
     providers: [MessageService]

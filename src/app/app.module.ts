@@ -21,6 +21,7 @@ import { AngularFireDatabaseModule } from 'angularfire2/database';
 import { AuthService } from './shared/services/auth.service';
 import { AuthGuard } from './shared/guard/auth.guard';
 import { UserService } from './shared/services/user/user.service';
+import { ExcelService } from "./shared/services/excel/excel.service";
 
 export const createTranslateLoader = (http: HttpClient) => {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -49,7 +50,7 @@ export const createTranslateLoader = (http: HttpClient) => {
     NgbModule.forRoot(),
   ],
   declarations: [AppComponent],
-  providers: [AuthService, AuthGuard, UserService],
+  providers: [AuthService, AuthGuard, UserService, ExcelService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

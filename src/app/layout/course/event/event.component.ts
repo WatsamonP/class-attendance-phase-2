@@ -11,6 +11,7 @@ import { MessageService } from '../../../shared/services/messageService';
 import { AuthService } from '../../../shared/services/auth.service'
 import * as moment from 'moment';
 import { ToastrService } from 'ngx-toastr';
+//import { format } from 'path';
 
 @Component({
   selector: 'app-event',
@@ -24,10 +25,8 @@ export class EventComponent implements OnInit {
   @ViewChild('duplicateEventScore')
   private duplicateEventScoreRef: TemplateRef<any>;
 
-  //private duplicateEventScore<any>;
-
   objectKeys = Object.keys;     // เอาไว้ใช้ใน html
-  selectedEvent: any;
+  eventParam: any;
   studentObservable: Observable<any>;
   scheduleObservable: Observable<any>;
   studentList: any;
@@ -45,13 +44,14 @@ export class EventComponent implements OnInit {
   isFixScore: boolean;  // เปิดช่องแก้ไขคะแนน
   isShowGroup: boolean;  // แสดงกลุ่มเรียน
   isShowPercent: boolean;  // แสดง%
-  isShowTotal: boolean;  // แสดงคะแนนรวม
+  isShowTotal: Number;  // แสดงคะแนนรวม
   isShowCountMiss: boolean;  // จำนวนครั้งขาดเรียน
   numberOfPage: number = 1;
   numberOfAllPage: number;
   numberOfAllPageShow: number;
   numberOfCol: number;
   isNotFound = true;
+  isNotShowData = false;
   authUid: String;
   courseParam: String;
   countAttendance: any;
@@ -67,6 +67,9 @@ export class EventComponent implements OnInit {
   missedClassCount: any;
   percentageScore: any;
   percentageConfig: any;
+  fixScoreIndex: any;
+  dynamicEvent: any;
+  eventName: String;
 
   constructor(
     private afDb: AngularFireDatabase,
@@ -81,10 +84,10 @@ export class EventComponent implements OnInit {
   ) {
     this.authUid = this.authService.authInfo$.value.$uid;
     this._messageService.listen().subscribe((m: any) => {
-      this.isFixScore = m.isFixScore;
+      //this.isFixScore = m.isFixScore;
       this.isShowGroup = m.isShowGroup;
       this.isShowPercent = m.isShowPercent;
-      this.isShowTotal = m.isShowTotal;
+      //this.isShowTotal = m.isShowTotal;
       this.isShowCountMiss = m.isShowCountMiss;
     })
     this.activatedRoute.paramMap.subscribe((params: ParamMap) => {
@@ -92,7 +95,7 @@ export class EventComponent implements OnInit {
       let cId = params.get('id');
       this.courseParam = cId;
       let event = params.get('event');
-      this.selectedEvent = event;
+      this.eventParam = event;
       this.scheduleObservable = afDb.object(`users/${this.authUid}/course/${cId}/schedule/${event}`).valueChanges();
       this.studentObservable = afDb.object(`users/${this.authUid}/course/${cId}/students`).valueChanges();
 
@@ -102,7 +105,7 @@ export class EventComponent implements OnInit {
       }).subscribe(course => {
         this.courseList = course;
         //let key = String(Object.keys(this.courseList[1].students));
-        console.log(this.courseList[1].students);
+        //console.log(this.courseList[1].students);
         //this.queryCourse(cId);
         //console.log(this.chartData);
         return course.map(item => item.key);
@@ -111,18 +114,20 @@ export class EventComponent implements OnInit {
 
       this.studentList = [];
       this.scheduleList = [];
-      
+
       afDb.list(`users/${this.authUid}/course/${cId}/schedule/${event}`).snapshotChanges().map(actions => {
         return actions.map(action => ({ key: action.key, ...action.payload.val() }));
       }).subscribe(items => {
         this.scheduleList = items;
         if (this.scheduleList.length == 0) {
           console.log('ไม่มี Schedule')
+          this.isNotShowData = false;
           setTimeout(() => this.isNotFound = false);
           setTimeout(() => this.isNotFound = true, 6000);
           this.alertConfig.type = 'warning';
           return false
         } else {
+          this.isNotShowData = true;
           this.numberOfCol = 5;
           this.numberOfPage = Math.ceil(this.scheduleList.length / this.numberOfCol);
           this.numberOfAllPageShow = Math.ceil(this.scheduleList.length / this.numberOfCol);
@@ -132,23 +137,11 @@ export class EventComponent implements OnInit {
           }).subscribe(stds => {
             this.studentList = stds;
             this.findPercentage()
-            if (this.selectedEvent == 'attendance') {
+            if (this.eventParam == 'attendance') {
               this.findMissClassCount()
               this.findStudentAttendancePercent()
-            } else if (this.selectedEvent == 'quiz') {
-              this.findStudentQuizPercent();
-            } else if (this.selectedEvent == 'hw') {
-              this.findStudentHwPercent();
-            } else if (this.selectedEvent == 'lab') {
-              this.findStudentLabPercent();
-            } else if (this.selectedEvent == 'assignment') {
-              this.findStudentAssignPercent();
-            } else if (this.selectedEvent == 'exercise') {
-              this.findStudentExercisePercent();
-            } else if (this.selectedEvent == 'project') {
-              this.findStudentProjectPercent();
-            }else{
-              console.log('Error หาไม่เห็น')
+            } else {
+              this.findEventPercent();
             }
             return stds.map(item => item.key);
           });
@@ -158,6 +151,15 @@ export class EventComponent implements OnInit {
 
     });// close param
 
+  }
+
+  onClickFixScore(i) {
+    this.fixScoreIndex = i;
+    this.isFixScore = !this.isFixScore;
+  }
+
+  setIndexForFix(i) {
+    this.fixScoreIndex = i;
   }
 
   isEmptyObject(obj) {
@@ -215,15 +217,15 @@ export class EventComponent implements OnInit {
     //this.getSchedule(dateId, student, score)
     this.changeScoreForm.patchValue({ changeScore: null })
     //console.log(this.chartData[0][index])
-    let onTime = this.chartData[0][index].countOnTime;
-    let miss = this.chartData[0][index].countMiss;
-    let late = this.chartData[0][index].countLate;
-    let leave = this.chartData[0][index].countLeave;
-    let count = this.chartData[0][index].count;
+    //let onTime = this.chartData[0][index].countOnTime;
+    //let miss = this.chartData[0][index].countMiss;
+    //let late = this.chartData[0][index].countLate;
+    //let leave = this.chartData[0][index].countLeave;
+    //let count = this.chartData[0][index].count;
     //console.log(this.chartData)
     //console.log(student, dateId)
 
-    if (this.selectedEvent == 'attendance') {
+    if (this.eventParam == 'attendance') {
       console.log('ไม่อนุญาติให้ป้อนคะแนน สำหรับ Attendance');
       this.toastr.error('ไม่อนุญาติให้ป้อนคะแนน สำหรับ Attendance');
       return false;
@@ -237,15 +239,15 @@ export class EventComponent implements OnInit {
       //setTimeout(() => this.staticAlertClosed = true, 5000);
       this.toastr.error('ข้อมูลจะไม่ถูกบันทึกลงฐานข้อมูล', 'กรุณาป้อนตัวเลข');
     } else if (isNumber(score)) {
-      console.log(this.selectedEvent)
+      console.log(this.eventParam)
 
       // Alert เดิม
       //setTimeout(() => this.staticAlertClosed = false);
-      //this.updateScoreString = 'แก้ไขคะแนน ' + this.selectedEvent + ' ของ ( '
+      //this.updateScoreString = 'แก้ไขคะแนน ' + this.eventParam + ' ของ ( '
       //  + student.id + ' : ' + student.name + ' ) เป็น ' + score + ' คะแนน';
       //this.alertConfig.type = 'success';
       //setTimeout(() => this.staticAlertClosed = true, 5000);
-      this.findCount(dateId, student, score)
+      this.findCount(dateId, student, score, index)
 
     }
   }
@@ -266,7 +268,7 @@ export class EventComponent implements OnInit {
         if (this.studentList[i].attendance[attKey].status == "Missed Class") {
           count++;
         } else {
-          console.log('Not Miss Class')
+          //console.log('Not Miss Class')
         }
       }
       this.missedClassCount.push(count)
@@ -274,10 +276,10 @@ export class EventComponent implements OnInit {
   }
 
   findStudentAttendancePercent() {
-    console.log(this.percentageConfig)
+    this.dynamicEvent = 'percentAttendance'
     let sumScore = 0; // ผลบวกคะแนนของ Student
     //let totalScore = 1; // คะแนนเต็มที่อาจารย์กำหนด Attendance ไม่ต้องกำหนด
-    let percenConfig = this.percentageConfig.percentAtt;
+    let percenConfig = this.percentageConfig.percentAttendance;
     let percentage = 0; // เก็บค่าเฉยๆ
 
     this.percentageScore = []; // เก็บ Array เท่าจำนวน นศ
@@ -285,9 +287,10 @@ export class EventComponent implements OnInit {
       sumScore = 0;
       for (var j = 0; j < this.scheduleList.length; j++) {
         let attKey = this.scheduleList[j].key; // เป็น Attendance อยู่แล้ว 
-        sumScore = sumScore + this.studentList[i].attendance[attKey].score
+        sumScore = Number(sumScore) + Number(this.studentList[i].attendance[attKey].score)
       }
-      percentage = (sumScore * this.scheduleList.length / percenConfig)
+      this.isShowTotal = this.scheduleList.length;
+      percentage = (sumScore * percenConfig / this.scheduleList.length)
       this.percentageScore.push(percentage)
     }
   }
@@ -309,67 +312,85 @@ export class EventComponent implements OnInit {
   //  XX  XX   XX     XX        XX       XX       XX   XXX
 
   // กำหนดค่า count เดิมทีบันทึกไว้
-  findCount(dateId, student, score) {
+  findCount(dateId, student, score, index) {
     let count: any;
     for (var i = 0; i < this.scheduleList.length; i++) {
       if (this.scheduleList[i].id == dateId) {
         count = this.scheduleList[i].count;
-        this.isCheckedOtherEvent(dateId, student, score, count)
+        this.isCheckedOtherEvent(dateId, student, score, count, index)
         break;
       }
     }
   }
 
   // ตรวจสอบว่าเคยบันทึกคะแนนรึยัง ยกเว้น Attendance
-  isCheckedOtherEvent(dateId, student, score, count) {
-    for (var i = 0; i < this.scheduleList.length; i++) {
-      if (this.scheduleList[i].checked !== undefined) {
-        if (student.id in this.scheduleList[i].checked) {
-          // มีคะแนนแล้ว ลดค่า count 1 ค่า
-          console.log('duplicate ต้องการบันทึกซ้ำ ??');
-          this.openConfirmAlert(this.duplicateEventScoreRef, dateId, student, score, (count - 1));
-          this.formDisabled = true;
-          this.cdr.detectChanges();
-          break;
-        } else {
-          // ยังไม่เคยถูกบันทึก ให้บันทึกใหม่
-          console.log('คะแนนยังไม่เคยถูกบันทึก')
-          this.toastr.success(
-            ' ของ ' + student.id + ' : ' + student.name + 'เป็น ' + score + ' คะแนน'
-            , 'บันทึกคะแนน ' + this.selectedEvent
-          );
-          this.saveDataOtherEvent(dateId, student, score, count);
-          break;
-        }
+  isCheckedOtherEvent(dateId, student, score, count, i) {
+    //for (var i = 0; i < this.scheduleList.length; i++) {
+    if (this.scheduleList[i].checked !== undefined) {
+      if (student.id in this.scheduleList[i].checked) {
+        // มีคะแนนแล้ว ลดค่า count 1 ค่า
+        console.log('duplicate ต้องการบันทึกซ้ำ ??');
+        this.openConfirmAlert(this.duplicateEventScoreRef, dateId, student, score, (count - 1));
+        this.formDisabled = true;
+        this.cdr.detectChanges();
+        //break;
       } else {
-        // บันทึกรอบแแรก ตอนที่ยังไม่มี checked เลย
-        console.log('บันทึกจ้า ครั้งที่ 1')
+        // ยังไม่เคยถูกบันทึก ให้บันทึกใหม่
+        console.log('คะแนนยังไม่เคยถูกบันทึก')
         this.toastr.success(
           ' ของ ' + student.id + ' : ' + student.name + 'เป็น ' + score + ' คะแนน'
-          , 'บันทึกคะแนน ' + this.selectedEvent
+          , 'บันทึกคะแนน ' + this.eventParam
         );
         this.saveDataOtherEvent(dateId, student, score, count);
-        break;
+        //break;
       }
+    } else {
+      // บันทึกรอบแแรก ตอนที่ยังไม่มี checked เลย
+      console.log('บันทึกจ้า ครั้งที่ 1')
+      this.toastr.success(
+        ' ของ ' + student.id + ' : ' + student.name + 'เป็น ' + score + ' คะแนน'
+        , 'บันทึกคะแนน ' + this.eventParam
+      );
+      this.saveDataOtherEvent(dateId, student, score, count);
+      //break;
     }
+    //}
   }
 
   //บันทึกลง DB
   saveDataOtherEvent(dateId, student, score, count) {
-    this.afDb.object(`users/${this.authUid}/course/${this.courseParam}/students/${student.id}/${this.selectedEvent}/${dateId}`).update({
+    this.afDb.object(`users/${this.authUid}/course/${this.courseParam}/students/${student.id}/${this.eventParam}/${dateId}`).update({
       score: score,
       date: Date(),
     })
     // ปรับค่า Count
-    this.afDb.object(`users/${this.authUid}/course/${this.courseParam}/schedule/${this.selectedEvent}/${dateId}`)
+    this.afDb.object(`users/${this.authUid}/course/${this.courseParam}/schedule/${this.eventParam}/${dateId}`)
       .update({
         count: Number(count + 1)
       });
     // mark ไว้ว่า Check แล้ว
-    this.afDb.object(`users/${this.authUid}/course/${this.courseParam}/schedule/${this.selectedEvent}/${dateId}/checked/${student.id}`)
+    this.afDb.object(`users/${this.authUid}/course/${this.courseParam}/schedule/${this.eventParam}/${dateId}/checked/${student.id}`)
       .set({
         id: student.id,
       });
+  }
+
+
+  findZeroScore(event) {
+    let count = 0;
+    this.missedClassCount = []; // เก็บ Array เท่าจำนวน นศ
+    for (var i = 0; i < this.studentList.length; i++) {
+      count = 0;
+      for (var j = 0; j < this.scheduleList.length; j++) {
+        let key = this.scheduleList[j].key; // เป็น Attendance อยู่แล้ว 
+        if (this.studentList[i][event][key].score == 0) {
+          count++;
+        } else {
+          //console.log('Not Miss Class')
+        }
+      }
+      this.missedClassCount.push(count)
+    }
   }
 
 
@@ -378,6 +399,7 @@ export class EventComponent implements OnInit {
   //  XXXXXXX  XXXXXXX  XXXXXXX  XX       XXXXXXX  XX X  XX     XX 
   //  XX       XX       XX  XX   XX       XX       XX  X XX     XX
   //  XX       XXXXXXX  XX   XX  XXXXXXX  XXXXXXX  XX   XXX     XX
+  /*
   findStudentQuizPercent() {
     console.log(this.percentageConfig)
     let sumScore = 0; // ผลบวกคะแนนของ Student
@@ -442,7 +464,7 @@ export class EventComponent implements OnInit {
     console.log(this.percentageConfig)
     let sumScore = 0; // ผลบวกคะแนนของ Student
     let totalScore = 0; // คะแนนเต็มที่อาจารย์กำหนด Attendance ไม่ต้องกำหนด
-    let percenConfig = this.percentageConfig.percentAssign;
+    let percenConfig = this.percentageConfig.percentAssignment;
     let percentage = 0; // เก็บค่าเฉยๆ
     this.percentageScore = []; // เก็บ Array เท่าจำนวน นศ
     for (var i = 0; i < this.studentList.length; i++) {
@@ -453,7 +475,7 @@ export class EventComponent implements OnInit {
         totalScore = totalScore + this.scheduleList[j].totalScore;
         sumScore = sumScore + this.studentList[i].assignment[key].score
       }
-      console.log(totalScore)
+      //console.log(totalScore)
       percentage = (sumScore * percenConfig / totalScore)
       this.percentageScore.push(percentage)
     }
@@ -498,6 +520,53 @@ export class EventComponent implements OnInit {
       this.percentageScore.push(percentage)
     }
   }
+  */
+
+  findEventPercent() {
+    console.log(this.percentageConfig)
+    //let tempPercent = Object.keys(this.percentageConfig)
+    let percentKey;
+    for (var i = 0; i < this.courseList.length; i++) {
+      if (this.courseList[i].id == this.courseParam) {
+        //console.log(this.courseList[i].eventList)
+        let eventKey = Object.keys(this.courseList[i].eventList)
+        //console.log(eventKey)
+        for (var j = 0; j < eventKey.length; j++) {
+          let temp = String(eventKey[j])
+          if (this.courseList[i].eventList[temp].id == this.eventParam) {
+            //console.log(this.courseList[i].eventList[temp].name)
+            percentKey = String('percent' + this.courseList[i].eventList[temp].name);
+            this.dynamicEvent = percentKey;
+            let percenConfig = this.percentageConfig[percentKey];
+            //console.log(percenConfig)
+            this.calPercentage(percenConfig, this.courseList[i].eventList[temp].id)
+            this.findZeroScore(this.courseList[i].eventList[temp].id)
+          }
+        }
+      }
+    }
+  }
+
+  calPercentage(percenConfig, event) {
+    let sumScore = 0; // ผลบวกคะแนนของ Student
+    let totalScore = 0; // คะแนนเต็มที่อาจารย์กำหนด Attendance ไม่ต้องกำหนด
+    let percentage = 0; // เก็บค่าเฉยๆ
+    this.percentageScore = []; // เก็บ Array เท่าจำนวน นศ
+    for (var i = 0; i < this.studentList.length; i++) {
+      sumScore = 0;
+      totalScore = 0;
+      for (var j = 0; j < this.scheduleList.length; j++) {
+        let key = this.scheduleList[j].key; // xxxx-xx-xx-xx-xx-xx
+        totalScore = Number(totalScore) + Number(this.scheduleList[j].totalScore);
+        // console.log(this.studentList[i][id][key].score) ได้คะแนนออกมา
+        sumScore = Number(sumScore) + Number(this.studentList[i][event][key].score)
+      }
+      this.isShowTotal = totalScore;
+      console.log(totalScore);
+      percentage = (sumScore * percenConfig / totalScore)
+      this.percentageScore.push(percentage)
+    }
+  }
 
 
 
@@ -509,23 +578,50 @@ export class EventComponent implements OnInit {
   //  XX   XX  XXXXXXX  XXXXXXX
 
   findPercentage() {
-    this.percentageConfig = {}
-    let percentAtt, percentHw, percentLab, percentQuiz, percentAssign, percentExercise, percentProject;
+    this.percentageConfig = {};
+    let percentAttendance, percentHw, percentLab, percentQuiz, percentAssignment, percentExercise, percentProject;
+    let myKey;
+    let obj = {}
     for (var i = 0; i < this.courseList.length; i++) {
       if (this.courseList[i].id == this.courseParam) {
-        percentAtt = this.courseList[i].percentAtt;
-        percentHw = this.courseList[i].percentHw;
-        percentLab = this.courseList[i].percentLab;
-        percentQuiz = this.courseList[i].percentQuiz;
-        percentAssign = this.courseList[i].percentAssign;
-        percentExercise = this.courseList[i].percentExercise;
-        percentProject = this.courseList[i].percentProject;
+        //console.log(this.courseList[i].eventList)
+        let eventKey = Object.keys(this.courseList[i].eventList)
+        //console.log(eventKey)
+        for (var j = 0; j < eventKey.length; j++) {
+          let temp = String(eventKey[j])
+          //console.log(this.courseList[i].eventList[temp].name)
+          myKey = String('percent' + this.courseList[i].eventList[temp].name);
+          obj = { [myKey]: this.courseList[i][myKey] };
+          this.percentageConfig = Object.assign(this.percentageConfig, obj);
+          //this.percentageConfig.push({[myKey]: this.courseList[i][myKey]})
+          // Set ไว้แสดงเฉยๆ
+          if(this.courseList[i].eventList[temp].id == this.eventParam){
+            this.eventName = this.courseList[i].eventList[temp].name; // set ไว้แสดงเฉยๆ
+          }
+        }
+
+
+
+        //if(this.courseList[i]){
+        //  console.log('Hi')
+        //}
+        //myKey = this.courseList[i]
+        //obj = {[myKey] : }
+        //percentAttendance = this.courseList[i].percentAttendance;
+        //percentHw = this.courseList[i].percentHw;
+        //percentLab = this.courseList[i].percentLab;
+        //percentQuiz = this.courseList[i].percentQuiz;
+        //percentAssignment = this.courseList[i].percentAssignment;
+        //percentExercise = this.courseList[i].percentExercise;
+        //percentProject = this.courseList[i].percentProject;
       }
     }
-    this.percentageConfig = {
-      percentAtt: percentAtt, percentHw: percentHw, percentLab: percentLab, percentQuiz: percentQuiz,
-      percentAssign: percentAtt, percentExercise: percentHw, percentProject: percentLab
-    }
+
+
+    //this.percentageConfig = {
+    //  percentAttendance: percentAttendance, percentHw: percentHw, percentLab: percentLab, percentQuiz: percentQuiz,
+    //  percentAssignment: percentAttendance, percentExercise: percentHw, percentProject: percentLab
+    //}
   }
 
 
@@ -547,7 +643,7 @@ export class EventComponent implements OnInit {
     this.modalService.open(content, { size: 'sm' }).result.then((result) => {
       this.toastr.success(
         ' ของ ' + student.id + ' : ' + student.name + 'เป็น ' + score + ' คะแนน'
-        , 'แก้ไขคะแนน ' + this.selectedEvent
+        , 'แก้ไขคะแนน ' + this.eventParam
       );
       console.log('บันทึกใหม่')
       this.saveDataOtherEvent(dateId, student, score, count);
@@ -557,6 +653,7 @@ export class EventComponent implements OnInit {
     }, (reason) => {
       console.log('ปิด / ยกเลิก')
       this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
+      this.formDisabled = !this.formDisabled;
     });
   }
   private getDismissReason(reason: any): string {
@@ -567,6 +664,15 @@ export class EventComponent implements OnInit {
     } else {
       return `with: ${reason}`;
     }
+  }
+
+  openSm(content,index) {
+    if(this.fixScoreIndex !== index){
+      // reset
+      this.fixScoreIndex = null;
+      this.isFixScore = false;
+    }
+    this.modalService.open(content);
   }
   ///////////////////////////////////////////////////////////////////////////////////////
 

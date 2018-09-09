@@ -2,7 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
 import { AngularFireDatabase } from 'angularfire2/database';
 import { AuthService } from '../../shared/services/auth.service';
-import { format } from 'url';
+//import { format } from 'url';
+import { ToastrService } from 'ngx-toastr';
 @Component({
   selector: 'app-add-course',
   templateUrl: './add-course.component.html',
@@ -15,18 +16,39 @@ export class AddCourseComponent implements OnInit {
   yearsList: number[] = [];
   terms: number[] = [1, 2, 3];
   authUid: String;
-  eventList = [
-    { id: 'attendance', name: "Attendance", fn: true, isClick: true, position: 0, isSelected: true },
-    { id: 'quiz', name: "Quiz", fn: true, isClick: false, position: 1, isSelected: true },
-    { id: 'hw', name: "Homework", fn: true, isClick: false, position: 2, isSelected: true },
-    { id: 'lab', name: "Lab", fn: false, isClick: false, position: 3, isSelected: false },
-    { id: 'exercise', name: "Exercise", fn: false, isClick: false, position: 4, isSelected: false },
-    { id: 'assignment', name: "Assignmnet", fn: false, isClick: false, position: 5, isSelected: false },
-    { id: 'project', name: "Project", fn: false, isClick: false, position: 6, isSelected: false },
+  eventInit = [
+    //{ id: 'attendance', name: "Attendance", fn: true, isClick: true, position: 0, isSelected: true },
+    //{ id: 'quiz', name: "Quiz", fn: true, isClick: false, position: 1, isSelected: true },
+    //{ id: 'hw', name: "Homework", fn: true, isClick: false, position: 2, isSelected: true },
+    { id: 'lab', name: "Lab", fn: false, isClick: false, isSelected: false },
+    { id: 'exercise', name: "Exercise", fn: false, isClick: false, isSelected: false },
+    { id: 'assignment', name: "Assignment", fn: false, isClick: false, isSelected: false },
+    { id: 'project', name: "Project", fn: false, isClick: false, isSelected: false },
   ]
+  eventList = [];
+  eventInput: String;
+  courseList: any;
 
-  constructor(private fb: FormBuilder, private authService: AuthService, private afDb: AngularFireDatabase) {
+  constructor(
+    private fb: FormBuilder,
+    private authService: AuthService,
+    private afDb: AngularFireDatabase,
+    private toastr: ToastrService,
+  ) {
     this.authUid = this.authService.authInfo$.value.$uid;
+    this.eventList = [
+      { id: 'attendance', name: "Attendance", fn: true, isClick: true, isSelected: true },
+      { id: 'quiz', name: "Quiz", fn: true, isClick: false, isSelected: true },
+      { id: 'hw', name: "Homework", fn: true, isClick: false, isSelected: true },
+    ];
+    // Query
+    this.courseList = [];
+    afDb.list(`users/${this.authUid}/course/`).snapshotChanges().map(actions => {
+      return actions.map(action => ({ key: action.key, ...action.payload.val() }));
+    }).subscribe(course => {
+      this.courseList = course;
+      return course.map(item => item.key);
+    });
   }
 
   ngOnInit() {
@@ -50,6 +72,7 @@ export class AddCourseComponent implements OnInit {
       trimester: new FormControl(null, [
         Validators.required
       ]),
+      eventInput: new FormControl(null),
 			/*
 			group: new FormControl(null, [
 				Validators.required
@@ -58,9 +81,66 @@ export class AddCourseComponent implements OnInit {
     });
   }
 
+  public onClickUserInsertEvent() {
+    let eventInput = String(this.addCourseForm.value.eventInput);
+    if (/\s/.test(eventInput)) {
+      // It has any kind of whitespace
+      this.toastr.error('ไม่อนุญาตให้มีช่องว่างในชื่อรายการ','มีช่องว่าง')
+      return false;
+    }
+    
+    let id = eventInput.toLowerCase();
+    this.eventList.push(
+      { id: id, name: eventInput, fn: false, isClick: false, isSelected: true },
+    )
+    console.log(this.eventList)
+  }
+
+  // เพิ่ม event เข้าไปใน eventList // ลบออกจาก eventInit
+  onClickinsertEvent(event) {
+    console.log(event)
+    event.isSelected = true;
+    for (var i = 0; i < this.eventInit.length; i++) {
+      if (this.eventInit[i].id == event.id) {
+        this.eventList.push(event)
+        this.eventInit.splice(i, 1)
+      }
+    }
+
+  }
+
+  // เพิ่ม event เข้าไปใน eventInit // ลบออกจาก eventList
+  onClickDisableEvent(event) {
+    console.log(event)
+    event.isSelected = false;
+    for (var i = 0; i < this.eventList.length; i++) {
+      if (this.eventList[i].id == event.id) {
+        this.eventInit.push(event)
+        this.eventList.splice(i, 1)
+      }
+    }
+    console.log(this.eventList)
+
+    //this.eventList.push(
+
+    //)
+
+    //this.eventListSelected.pop()
+  }
+
   onClickSave() {
+    if (this.eventList.length == 0) {
+      this.toastr.error('ต้องมีรายการเก็บคะแนนอย่างน้อย 1 รายการ');
+      return false;
+    }
     const val = this.addCourseForm.value;
-    console.log(`users/${this.authUid}/course/${val.id}`)
+    for (var i = 0; i < this.courseList.length; i++) {
+      if (String(val.id) == String(this.courseList[i].id)) {
+        this.toastr.error('รหัสวิชาซ้ำกับ ' + this.courseList[i].name, 'รหัสนี้เคยสร้างแล้ว');
+        return false
+      }
+    }
+    
     this.afDb.object(`users/${this.authUid}/course/${val.id}`).update({
       id: val.id,
       name: val.name,
@@ -69,7 +149,7 @@ export class AddCourseComponent implements OnInit {
       img: 'pic'
     });
 
-    // คะแนนรวม
+    //คะแนนรวม
     this.afDb.object(`users/${this.authUid}/course/${val.id}/eventList/score`)
       .update({ id: 'score', name: "Score", fn: true, isClick: false })
     // จำเป็นต้องมี
@@ -78,15 +158,31 @@ export class AddCourseComponent implements OnInit {
     //this.afDb.object(`users/${this.authUid}/course/${val.id}`)
     //  .update({ percentAtt: 0 })
     // อื่นๆ
-    for(var i=0; i<this.eventList.length; i++){
-      if(this.eventList[i].isSelected){console.log('เลือก '+ this.eventList[i].name)}
+
+    for (var i = 0; i < this.eventList.length; i++) {
+      if (this.eventList[i].isSelected) {
+        //let event = this.eventList[i];
+        console.log('เลือก ' + this.eventList[i].name)
+        // Set List
+        this.afDb.object(`users/${this.authUid}/course/${val.id}/eventList/${this.eventList[i].id}`)
+          .update({ id: this.eventList[i].id, name: this.eventList[i].name, fn: true, isClick: false })
+        // set Percent
+        let pString = String('percent'+this.eventList[i].name);
+        var obj = {[pString]: 0}
+        //let object = {String(pString): 0};
+        this.afDb.object(`users/${this.authUid}/course/${val.id}`)
+          .update(obj)
+        continue;
+      }
     }
+    /*
     if (this.eventList[0].isSelected) {
       this.afDb.object(`users/${this.authUid}/course/${val.id}/eventList/attendance`)
         .update({ id: 'attendance', name: "Attendance", fn: true, isClick: false })
       this.afDb.object(`users/${this.authUid}/course/${val.id}`)
         .update({ percentAtt: 0 })
     }
+    
     if (this.eventList[1].isSelected) {
       this.afDb.object(`users/${this.authUid}/course/${val.id}/eventList/quiz`)
         .update({ id: 'quiz', name: "Quiz", fn: true, isClick: false })
@@ -123,8 +219,7 @@ export class AddCourseComponent implements OnInit {
       this.afDb.object(`users/${this.authUid}/course/${val.id}`)
         .update({ percentProject: 0 })
     }
-
-
+    */
 
   }
 

@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, Input, ViewEncapsulation, ChangeDetectorRef } from '@angular/core';
 import { EventComponent } from './event/event.component'
 import { Router, ParamMap, ActivatedRoute, } from '@angular/router';
 import { Observable } from 'rxjs';
@@ -8,7 +8,7 @@ import { AngularFireDatabase } from 'angularfire2/database'
 import * as moment from 'moment';
 import { EventModel } from '../../shared/models/eventList.model'
 import { MessageService } from '../../shared/services/messageService'
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 
 @Component({
@@ -48,6 +48,7 @@ export class CourseComponent implements OnInit {
   model = 1;
   insertStudentForm: FormGroup;
   updateCourseDataForm: FormGroup;
+  insertSchedule: FormGroup;
   //กลุ่มแก้ไข
   isFixScore: boolean = false;;  // เปิดช่องแก้ไขคะแนน
   isShowGroup: boolean = false;;  // แสดงกลุ่มเรียน
@@ -60,6 +61,9 @@ export class CourseComponent implements OnInit {
   csv: any;
   countUploadStudentProgress: Number = 0;
   uploadFlag: boolean = false;
+  courseIndex: number;
+  initTotalScore: String;
+  dynamicEvent: any;
   /*
   eventList = [
     { id: 'attendance', name: "Attendance", fn: true, isClick: true },
@@ -77,7 +81,8 @@ export class CourseComponent implements OnInit {
     private activatedRoute: ActivatedRoute,
     private _messageService: MessageService,
     private fb: FormBuilder,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private cdr: ChangeDetectorRef
   ) {
     //init
     this.authUid = this.authService.authInfo$.value.$uid;
@@ -101,6 +106,7 @@ export class CourseComponent implements OnInit {
       this.eventParam = String(params.get('event'));
 
       // Query Couese
+      this.courseList = []
       this.courseItem = afDb.object(`users/${this.authUid}/course/${cId}`).valueChanges();
 
       // Query Student
@@ -117,49 +123,77 @@ export class CourseComponent implements OnInit {
         }).subscribe(events => {
           this.eventList = events;
           //console.log(this.eventList)
-          /*
           for (var i = 0; i < this.eventList.length; i++) {
             let eventId = this.eventList[i].key;
             if (this.eventParam == eventId) {
               this.eventList[i].isClick = true;
               this.selectedEvent = this.eventList[i];
               //console.log(this.eventList[i].key)
-              this.afDb.object(`users/${this.authUid}/course/${this.courseParam}/eventList/${this.eventList[i].key}`)
-                .update({ isClick: true })
+              //this.afDb.object(`users/${this.authUid}/course/${this.courseParam}/eventList/${this.eventList[i].key}`)
+              //  .update({ isClick: true })
             } else {
               this.eventList[i].isClick = false;
-              this.afDb.object(`users/${this.authUid}/course/${this.courseParam}/eventList/${this.eventList[i].key}`)
-                .update({ isClick: false })
+              //this.afDb.object(`users/${this.authUid}/course/${this.courseParam}/eventList/${this.eventList[i].key}`)
+              //  .update({ isClick: false })
             }
-          }*/
+          }
           return events.map(item => item.key);
         });
 
-      this.insertStudentForm = this.fb.group({
-        id: ['', Validators.required],
-        name: ['', Validators.required],
-        group: ['', Validators.required]
-      });
-
-      this.updateCourseDataForm = this.fb.group({
-        name: [null, Validators.required],
-        groupNo: [Number, Validators.required],
-        trimester: [null, Validators.required],
-        year: [null, Validators.required],
-        abbreviation: '',
-        percentAtt: '',
-        percentHw: '',
-        percentLab: '',
-        percentQuiz: '',
-        percentAssign: '',
-        percentExercise: '',
-        percentProject: '',
-      });
-      this.setInitCourseDataForm();
+      this.setInitCourseDataForm()
+      //this.cdr.detectChanges();
     });
   }
 
   ngOnInit() {
+    this.insertStudentForm = this.fb.group({
+      id: ['', Validators.required],
+      name: ['', Validators.required],
+      group: ['', Validators.required]
+    });
+
+    this.updateCourseDataForm = this.fb.group({
+      name: ['', Validators.required],
+      //groupNo: ['', Validators.required],
+      trimester: ['', Validators.required],
+      year: ['', Validators.required],
+      abbreviation: ''
+      //percentAttendance: '',
+      //percentHw: '',
+      //percentLab: '',
+      //percentQuiz: '',
+      //percentAssignment: '',
+      //percentExercise: '',
+      //percentProject: '',
+    });
+
+    this.insertSchedule = this.fb.group({
+      totalScore: ['', Validators.required]
+    });
+
+
+
+
+
+
+    /*
+      this.updateCourseDataForm.setValue({
+        name: this.courseList.name,
+        groupNo: this.courseList.groupNo,
+        trimester: this.courseList.name,
+        year: this.courseList.name,
+        abbreviation: '',
+        percentAttendance: '',
+        percentHw: '',
+        percentLab: '',
+        percentQuiz: '',
+        percentAssignment: '',
+        percentExercise: '',
+        percentProject: '',
+      })
+      */
+
+    /*
     for (var i = 0; i < this.eventList.length; i++) {
       let eventId = this.eventList[i].key;
       if (this.eventParam == eventId) {
@@ -174,44 +208,64 @@ export class CourseComponent implements OnInit {
           .update({ isClick: false })
       }
     }
+    */
   }
 
-  get groupNo() {
-    return this.updateCourseDataForm.get('groupNo');
-  }
-
-  getName() {
-    this.courseItem.subscribe(s => {
-      return s.name
-    })
-    //return 'Watsamon'
-  }
+  //get groupNo() {
+  //  return this.updateCourseDataForm.get('groupNo');
+  //}
 
   setInitCourseDataForm() {
     this.courseItem.subscribe(item => {
       const val = this.updateCourseDataForm;
       val.patchValue({ name: item.name });
-      val.patchValue({ groupNo: item.groupNo });
-      this.tempGroupNumber = item.groupNo;
+      //val.patchValue({ groupNo: item.groupNo });
+      //this.tempGroupNumber = item.groupNo;
       val.patchValue({ trimester: item.trimester });
       val.patchValue({ year: item.year });
       if (item.abbreviation !== undefined)
         val.patchValue({ abbreviation: item.abbreviation });
+      let eventKey = Object.keys(item.eventList)
+      //console.log(eventKey)
+      let obj = {}
+      let tempObj = {}
+      let allPercent = {}
+      this.dynamicEvent = [];
+      for (var j = 0; j < eventKey.length; j++) {
+        let temp = String(eventKey[j])
+        if (temp == 'score') {
+          continue;
+        }
+        let percentKey = String('percent' + item.eventList[temp].name);
+        let nameKey = String(item.eventList[temp].name);
+        //this.dynamicEvent = percentKey;
+        //let percenConfig = this.percentageConfig[percentKey];
+        //console.log(percentKey) //percentXxxxx ออกมา
+        obj = { [percentKey]: item[percentKey] };
+        allPercent = Object.assign(tempObj, obj);
+        this.dynamicEvent.push({ name: nameKey, percent: item[percentKey], percentKey: percentKey })
+        val.addControl(String(percentKey), new FormControl(item[percentKey]));
+      }
+      console.log(this.dynamicEvent)
+      console.log(val.value)
+
       //
-      if (item.percentAtt !== undefined)
-        val.patchValue({ percentAtt: item.percentAtt });
+      /*
+      if (item.percentAttendance !== undefined)
+        val.patchValue({ percentAttendance: item.percentAttendance });
       if (item.percentHw !== undefined)
         val.patchValue({ percentHw: item.percentHw });
       if (item.percentLab !== undefined)
         val.patchValue({ percentLab: item.percentLab });
       if (item.percentQuiz !== undefined)
         val.patchValue({ percentQuiz: item.percentQuiz });
-      if (item.percentAssign !== undefined)
-        val.patchValue({ percentAssign: item.percentAssign });
+      if (item.percentAssignment !== undefined)
+        val.patchValue({ percentAssignment: item.percentAssignment });
       if (item.percentExercise !== undefined)
         val.patchValue({ percentExercise: item.percentExercise });
       if (item.percentProject !== undefined)
         val.patchValue({ percentProject: item.percentProject });
+        */
     })
   }
 
@@ -219,9 +273,6 @@ export class CourseComponent implements OnInit {
     //console.log(number, !Number.isNaN(number))
     return number == null || number == undefined
   }
-
-
-
 
   public onClickEvent(event) {
     for (var x in this.eventList) {
@@ -257,10 +308,12 @@ export class CourseComponent implements OnInit {
 
   public onClickUpdateCourseData() {
     if (this.updateCourseDataForm.invalid) {
-      console.log('จำเป็นต้องมีกลุ่มเรียน')
+      console.log(this.updateCourseDataForm.value)
+      console.log('Error')
       return false
     }
     const val = this.updateCourseDataForm.value;
+    /*
     this.afDb.object(`users/${this.authUid}/course/${this.courseParam}`).update({
       name: val.name,
       groupNo: val.groupNo,
@@ -273,9 +326,20 @@ export class CourseComponent implements OnInit {
         abbreviation: val.abbreviation
       })
     }
-    if (val.percentAtt !== null) {
+    */
+
+    let temp = Object.keys(val)
+    //var obj = { [pString]: 0 }
+    for (var i = 0; i < temp.length; i++) {
+      console.log(temp[i])
+      var obj = { [temp[i]]:  val[temp[i]]}
+      //let object = {String(pString): 0};
+      this.afDb.object(`users/${this.authUid}/course/${this.courseParam}`).update(obj)
+    }
+    /*
+    if (val.percentAttendance !== null) {
       this.afDb.object(`users/${this.authUid}/course/${this.courseParam}`).update({
-        percentAtt: val.percentAtt
+        percentAttendance: val.percentAttendance
       })
     }
     if (val.percentHw !== null) {
@@ -293,9 +357,9 @@ export class CourseComponent implements OnInit {
         percentQuiz: val.percentQuiz
       })
     }
-    if (val.percentAssign !== null) {
+    if (val.percentAssignment !== null) {
       this.afDb.object(`users/${this.authUid}/course/${this.courseParam}`).update({
-        percentAssign: val.percentAssign
+        percentAssignment: val.percentAssignment
       })
     }
     if (val.percentExercise !== null) {
@@ -308,9 +372,9 @@ export class CourseComponent implements OnInit {
         percentProject: val.percentProject
       })
     }
-    this.toastr.success('บันทึกการตั้งค่าสำเร็จ');
+    */
+    this.toastr.success('กรุณารอ Reload สักครู่','บันทึกการตั้งค่าสำเร็จ');
     setTimeout(() => { location.reload() }, 3000);
-
   }
 
 
@@ -325,6 +389,11 @@ export class CourseComponent implements OnInit {
       this.closeResult = "d('Cross click')";
       return false;
     } else {
+      console.log(this.eventParam)
+      if(this.eventParam == 'attendance'){
+        this.toastr.error('ไม่อนุญาติให้มีการสร้าง ATTENDANCE ผ่าน WEB','ผิดพลาด')
+        return false;
+      }
       this.uploadFlag = true;
       this.warningMessage = "ต้องการสร้าง " + this.selectedEvent.name + " ใหม่";
       this.openEvent(warningAlert);
@@ -333,6 +402,13 @@ export class CourseComponent implements OnInit {
   }
 
   letCreateEventSlot() {
+    console.log(this.insertSchedule.value.totalScore)
+    const total = this.insertSchedule.value.totalScore;
+    if (this.insertSchedule.invalid && this.eventParam !== 'attendance') {
+      this.toastr.error('กรุณากรอกคะแนนเต็ม')
+      return false
+    }
+
     console.log('กำลังจะสร้าง ' + this.selectedEvent.name + ' ใหม่นะจ๊ะ')
     let dateId = moment().format("YYYY-MM-DD-HH-mm-ss");
     const authUid = this.authUid;
@@ -344,8 +420,7 @@ export class CourseComponent implements OnInit {
         break;
       }
       default: {
-        this.onCreateOtherEvent(authUid, this.courseParam, dateId, this.eventParam);
-        console.log("Invalid choice");
+        this.onCreateOtherEvent(authUid, this.courseParam, dateId, this.eventParam, total);
         break;
       }
     }
@@ -385,16 +460,24 @@ export class CourseComponent implements OnInit {
     var csvArray2d = new Array();
     var regex = new RegExp("^[ก-๙a-zA-Z]+\\s[ก-๙a-zA-Z]+$");
     var overgroup = false;
+    // ก่อนแก้
+    //for (var i = 1; i < csvArray.length - 1; i++) {
+    //  csvArray2d[i] = csvArray[i].split(",");
+    //  if (csvArray2d[i][4] > this.tempGroupNumber)
+    //    overgroup = true;
+    //}
     for (var i = 1; i < csvArray.length - 1; i++) {
       csvArray2d[i] = csvArray[i].split(",");
-      if (csvArray2d[i][4] > this.tempGroupNumber)
-        overgroup = true;
+      //if (csvArray2d[i][4] == 1 && this.tempGroupNumber == 1) {
+      //  continue;
+      //} else if (csvArray2d[i][4] > this.tempGroupNumber - 1)
+      //  overgroup = true;
     }
     //console.log(overgroup)
-    if (overgroup)
-      console.log('กลุ่มเกินจ้า')
+    //if (overgroup)
+      //console.log('กลุ่มเกินจ้า')
     //this.toastr.warning("จำนวนกลุ่มในไฟล์ csv มากกว่า จำนวนกลุ่มที่สร้างไว้");
-    else {
+    //else {
       //console.log(this.studentListArr)
       for (var i = 1; i < csvArray2d.length; i++) {
         if (regex.test(csvArray2d[i][2])) {
@@ -403,17 +486,21 @@ export class CourseComponent implements OnInit {
           student.group = csvArray2d[i][4];
           this.insertStudent(student);
           if (i == csvArray2d.length - 1)
-            console.log("Upload Successfully")
+            //console.log("Upload Successfully")
+            this.toastr.success('Please wait for a while','Upload Successfully')
+            setTimeout(() => { location.reload() }, 3000);
           //this.toastr.success("Upload Successfully");
         } else {
           console.log("Upload Failed : Please upload UTF-8 Format")
+          this.toastr.error('Please upload UTF-8 Format','Upload Failed')
           //this.toastr.error("Upload Failed : Please upload UTF-8 Format");
           break;
         }
       }
-    }
+    //}
     this.csv = "";
   }
+
 
   insertStudent(student) {
     this.afDb.object(`users/${this.authUid}/course/${this.courseParam}/students/${student.id}`)
@@ -508,12 +595,12 @@ export class CourseComponent implements OnInit {
     setTimeout(() => { location.reload() }, 3000);
   }
 
-  onCreateOtherEvent(authUid, course_id, dateId, eventKey) {
+  onCreateOtherEvent(authUid, course_id, dateId, eventKey, total) {
     this.afDb.object(`users/${authUid}/course/${course_id}/schedule/${eventKey}/${dateId}`)
       .update({
         id: dateId,
         date: Date(),
-        totalScore: 0,
+        totalScore: total,
         count: 0,
       });
 
@@ -539,7 +626,10 @@ export class CourseComponent implements OnInit {
   // XXXXXXX  XX       XXXXXXX  XX   XXX    XX   X   XX  XXXXXXX  XXXXX    XX   XX  XXXXXXX
   public openAndClose(content, close) {
     this.closeResult = "d('Cross click')";
-    //this.modalService.open(content);
+    this.modalService.open(content, { centered: true });
+  }
+
+  public openTools(content) {
     this.modalService.open(content, { centered: true });
   }
 
