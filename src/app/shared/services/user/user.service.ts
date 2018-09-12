@@ -17,7 +17,9 @@ export class UserService {
   
 
   getUserList(){
-    this.userList = this.db.object(`users/${this.authService.authInfo$.value.$uid}/profile`);
+    const authUid = this.authService.currentUserId;
+    //const authUid = this.authService.authInfo$.value.$uid;
+    this.userList = this.db.object(`users/${authUid}/profile`);
     return this.userList;
   }
 
@@ -26,16 +28,18 @@ export class UserService {
       email: user.email,
       firstName : user.firstName,
       lastName : user.lastName,
-      stdId : user.stdId
+      tel : user.tel,
+      username : user.username
     });
   }
 
   updateUser(user : any){
-    this.getUserList().update({
+    this.getUserList().set({
       email: user.email,
       firstName : user.firstName,
       lastName : user.lastName,
-      stdId : user.stdId
+      tel : user.tel,
+      username : user.username
     });
   }
 

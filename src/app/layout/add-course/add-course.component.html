@@ -14,7 +14,7 @@
 </html>
 <br>
 
-<div class="container">
+<div class="container" [@routerTransition]>
   <form autocomplete="off" novalidate class="login-form" [formGroup]="addCourseForm" (ngSubmit)="onClickSave()">
     <fieldset>
       <!-- รหัสวิชา -->

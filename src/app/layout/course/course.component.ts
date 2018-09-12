@@ -85,7 +85,9 @@ export class CourseComponent implements OnInit {
     private cdr: ChangeDetectorRef
   ) {
     //init
-    this.authUid = this.authService.authInfo$.value.$uid;
+    const authUid = this.authService.currentUserId;
+    this.authUid = this.authService.currentUserId;
+    //const authUid = this.authService.authInfo$.value.$uid;
     /*
     this.afDb.object(`users/${this.authUid}/course/523495/eventList/attendance`)
       .update({ id: 'attendance', name: "Attendance", fn: true, isClick: true, position: 0 })
@@ -431,13 +433,13 @@ export class CourseComponent implements OnInit {
     if (this.insertStudentForm.invalid) {
       return false
     }
-    if (this.tempGroupNumber == undefined) {
-      console.log('ยังไม่มีกลุ่มจ้า')
-    } else if (student.group > this.tempGroupNumber) {
-      console.log('กลุ่มเกิน')
-    } else {
+    //if (this.tempGroupNumber == undefined) {
+    //  console.log('ยังไม่มีกลุ่มจ้า')
+    //} else if (student.group > this.tempGroupNumber) {
+    //  console.log('กลุ่มเกิน')
+    //} else {
       this.insertStudent(student);
-    }
+    //}
   }
 
   onFileSelect(files: FileList) {

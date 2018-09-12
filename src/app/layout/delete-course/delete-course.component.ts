@@ -14,7 +14,8 @@ export class DeleteCourseComponent implements OnInit {
   courseList: any;
 
   constructor(private authService: AuthService, private afDb: AngularFireDatabase) {
-    this.authUid = this.authService.authInfo$.value.$uid;
+    //this.authUid = this.authService.authInfo$.value.$uid;
+    this.authUid = this.authService.currentUserId;
     
     this.courseList = [];
     afDb.list(`users/${this.authUid}/course/`).snapshotChanges().map(actions => {

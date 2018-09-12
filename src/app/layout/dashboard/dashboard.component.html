@@ -6,10 +6,10 @@
       <div class="card-header">
         <div class="row">
           <div class="col-8 text-left"><b>
-            <p style="display:inline; font-size: 20px">{{ i+1 }}&nbsp;
+              <p style="display:inline; font-size: 20px">{{ i+1 }}&nbsp;
                 <i class="fa fa-angle-right" aria-hidden="true"></i>&nbsp;
-            </p>
-            <p style="display:inline; font-size: 20px">{{ course.id }} | {{ course.name }}</p></b>
+              </p>
+              <p style="display:inline; font-size: 20px">{{ course.id }} | {{ course.name }}</p></b>
           </div>
           <div class="col-4 text-right">
             <button type="button" class="btn btn-warning" (click)="test(course.students)">
@@ -44,7 +44,7 @@
             </ul>
           </div>
         </div>
-        <div *ngIf="isEmptyObject(course.schedule)" class="text-danger" style="font-size:14px">
+        <!--div *ngIf="isEmptyObject(course.schedule)" class="text-danger" style="font-size:14px">
           <i class="fa fa-users" aria-hidden="true"></i>&nbsp; ยังไม่มีข้อมูล Attendance
         </div>
         <div *ngIf="!isEmptyObject(course.schedule)"  class="card mb-3">
@@ -56,16 +56,14 @@
               [chartType]="barChartType" (chartHover)="chartHovered($event)" (chartClick)="chartClicked($event)">
             </canvas>
           </div>
-          <!--div class="card-footer">
-            <button class="btn btn-info btn-sm" (click)="randomize()">Update</button>
-          </div-->
         </div>
+      </div-->
+
       </div>
       <div class="card-footer text-muted">
         ...
       </div>
+      <br>
+      <hr><br>
     </div>
-    <br>
-    <hr><br>
   </div>
-</div>

@@ -82,7 +82,8 @@ export class EventComponent implements OnInit {
     private modalService: NgbModal,
     private cdr: ChangeDetectorRef
   ) {
-    this.authUid = this.authService.authInfo$.value.$uid;
+    //this.authUid = this.authService.authInfo$.value.$uid;
+    this.authUid = this.authService.currentUserId;
     this._messageService.listen().subscribe((m: any) => {
       //this.isFixScore = m.isFixScore;
       this.isShowGroup = m.isShowGroup;

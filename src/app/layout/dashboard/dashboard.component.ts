@@ -5,7 +5,8 @@ import { AuthService } from "../../shared/services/auth.service";
 import { Observable, Subject } from 'rxjs';
 import * as moment from 'moment';
 import { MessageService } from '../../shared/services/messageService';
-
+import { DataService } from '../../shared/services/data/data.service'
+import { format } from 'url';
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
@@ -25,20 +26,29 @@ export class DashboardComponent implements OnInit {
   chartLabels: any;
   chartData: any;
   barList: any;
+  feedbackList: any;
+  itemFeedback: any;
+  attendanceObject: any;
+  lastAttendance: any;
+  courseAttendance: any;
+  feedbackAttendanceList: any;
 
-  constructor
-  (private authService: AuthService, 
+  constructor(
+    private authService: AuthService,
     private afDb: AngularFireDatabase,
-    private _messageService: MessageService) {
+    private _messageService: MessageService,
+    private _dataService: DataService) {
 
-    const authUid = this.authService.authInfo$.value.$uid;
-    
+    const authUid = this.authService.currentUserId;
+    //const authUid = this.authService.authInfo$.value.$uid;
     this.courseList = [];
     afDb.list(`users/${authUid}/course/`).snapshotChanges().map(actions => {
       return actions.map(action => ({ key: action.key, ...action.payload.val() }));
     }).subscribe(items => {
       this.courseList = items;
       this.getBarChartData();
+      this.getAttendanceConfig(authUid);
+      console.log(this.courseAttendance)
       return items.map(item => item.key);
     });
 
@@ -93,7 +103,147 @@ export class DashboardComponent implements OnInit {
   }
 
   ngOnInit() {
+    console.log(this.lastAttendance)
+  }
 
+  setDefault() {
+    console.log('set')
+    this.lastAttendance = [
+      { index: 0, feeling: 'ยากมาก', count: 0 },
+      { index: 1, feeling: 'ยาก', count: 0 },
+      { index: 2, feeling: 'ไม่โอเค', count: 0 },
+      { index: 3, feeling: 'โอเค', count: 0 },
+      { index: 4, feeling: 'ดี', count: 0 },
+      { index: 5, feeling: 'ดีมาก', count: 0 },
+      { index: 6, feeling: 'น่าเบื่อ', count: 0 },
+      { index: 7, feeling: 'ง่วง', count: 0 },
+      { index: 8, feeling: 'something', count: 0 }
+    ]
+
+    return this.lastAttendance;
+  }
+
+
+  getFeedback(course_id, attendancekey) {
+    let tempStudent;
+    //this.setDefault();
+    this._dataService.getStudent().subscribe(resStd => {
+      //let ob = {}
+      tempStudent = Object.keys(resStd);
+      this.setDefault();
+      for (var i = 0; i < tempStudent.length; i++) {
+        this._dataService.getFeedback(tempStudent[i], course_id)
+          .subscribe((resFeedback) => {
+            if (resFeedback.feedback !== null) {
+              if (resFeedback.feedback[attendancekey[attendancekey.length-1]] !== undefined) {
+                //console.log(resFeedback.feedback[attendancekey[attendancekey.length-1]])
+                let index = resFeedback.feedback[attendancekey[attendancekey.length-1]].rating;
+                this.lastAttendance[index].count = Number(this.lastAttendance[index].count) + 1;
+                this.lastAttendance[8].feeling = course_id;
+              }
+            } else {
+              //this.lastAttendance[8].feeling = course_id;
+            }
+          })
+      }
+      console.log(this.lastAttendance)
+      //let list = []
+      //list.push(ob)
+      //console.log(list)
+    })
+  }
+
+  getAttendanceConfig(authUid) {
+    //this.setDefault();
+    this.feedbackAttendanceList = [];
+    for (var i = 0; i < this.courseList.length; i++) {
+      let attendanceConfig: any;
+      let course_id = this.courseList[i].id;
+      this.afDb.object(`users/${authUid}/course/${course_id}`).valueChanges()
+        .subscribe(res => {
+          let temp: any = res;
+          attendanceConfig = temp.schedule.attendance;
+          let attendancekey = Object.keys(attendanceConfig)
+          for (var j = 0; j < attendancekey.length; j++) {
+
+            //this.setDefault()
+            //console.log(course_id, attendancekey[j])
+            this.getFeedback(course_id, attendancekey)
+          }
+          //this.clear();
+        })
+    }
+    /*
+    let tempStudent;
+    for (var j = 0; j < this.courseList.length; j++) {
+      this.courseAttendance = [];
+      this.itemFeedback = this.afDb.object(`users/${authUid}/course/${this.courseList[j].id}`).valueChanges();
+      let course_id = this.courseList[j].id;
+      this.itemFeedback.subscribe(res => {
+        this.attendanceObject = res.schedule.attendance;
+        let attendancekey = Object.keys(res.schedule.attendance);
+        this._dataService.getStudent().subscribe(resStd => {
+          tempStudent = Object.keys(resStd);
+          this.lastAttendance = [
+            { index: 0, feeling: 'ยากมาก', count: 0 },
+            { index: 1, feeling: 'ยาก', count: 0 },
+            { index: 2, feeling: 'ไม่โอเค', count: 0 },
+            { index: 3, feeling: 'โอเค', count: 0 },
+            { index: 4, feeling: 'ดี', count: 0 },
+            { index: 5, feeling: 'ดีมาก', count: 0 },
+            { index: 6, feeling: 'น่าเบื่อ', count: 0 },
+            { index: 7, feeling: 'ง่วง', count: 0 }
+          ]
+          for (var i = 0; i < tempStudent.length; i++) {
+            this._dataService.getFeedback(tempStudent[i], course_id)
+              .subscribe((resFeedback) => {
+                // แต่ละ Courseรันตามจำนวนนักศึกษา
+                if (resFeedback !== null) {
+                  if (resFeedback[attendancekey[attendancekey.length - 1]] !== undefined) {
+                    
+                    let index = resFeedback[attendancekey[attendancekey.length - 1]].rating;
+                    //let feeling = resFeedback[attendancekey[attendancekey.length - 1]].feeling;
+                    //console.log(feeling)
+                    this.lastAttendance[index].count = Number(this.lastAttendance[index].count) + 1;
+                  }
+                }else{
+                  console.log('ยังไม่มี Feeback')
+                }
+              })
+          }
+          console.log(course_id,this.lastAttendance)
+          //this.courseAttendance[j] = this.lastAttendance
+          //console.log(j, this.courseAttendance[j])
+        })
+      })
+    }
+    */
+  }
+
+  setStudent(res) {
+    if (res == null) {
+      return false
+    }
+
+    let obj = {};
+    let attFeedback = Object.keys(res)
+    console.log(attFeedback.length)
+    for (var i = 0; i < attFeedback.length; i++) {
+      //console.log(res[String(attFeedback)].AttendanceId)
+      console.log(attFeedback)
+    }
+    /*
+    for (var i = 0; i < courseKey.length; i++) {
+      this._courseService.getStudent(res.teacher, courseKey[i], res.course[courseKey[i]], this.student_id).subscribe((resStudent) => {
+        if (resStudent.student !== null) {
+          console.log(resStudent)
+          this.studentlist.push(resStudent)
+          this.isNotFound = false;
+        }
+      })
+    }
+    */
+    this.feedbackList.push(obj)
   }
 
   isEmptyObject(obj) {
@@ -145,7 +295,7 @@ export class DashboardComponent implements OnInit {
           leave.push(this.courseList[i].schedule.attendance[this.myKey[k]].countLeave)
         }
         dataSet.push(
-          { data: onTime, label: 'on Time'},
+          { data: onTime, label: 'on Time' },
           { data: miss, label: 'Missed Class' },
           { data: late, label: 'Late' },
           { data: leave, label: 'Leave' }

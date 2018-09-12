@@ -1,50 +1,78 @@
 import { Component, OnInit } from '@angular/core';
-import { Validators, FormGroup, FormBuilder } from "@angular/forms";
+import { Validators, FormGroup, FormBuilder, FormControl } from "@angular/forms";
 import { AuthService } from "../shared/services/auth.service";
 import { Router } from "@angular/router";
-//import { ToastrService } from 'ngx-toastr';
+import { ToastrService } from 'ngx-toastr';
+import { routerTransition } from '../router.animations';
 
 @Component({
   selector: 'app-signin',
   templateUrl: './signin.component.html',
-  styleUrls: ['./signin.component.scss']
+  styleUrls: ['./signin.component.scss'],
+  animations: [routerTransition()]
 })
 export class SigninComponent implements OnInit {
-  
-  form:FormGroup;
+
+  form: FormGroup;
 
   constructor(
-    private fb:FormBuilder, 
+    private fb: FormBuilder,
     private authService: AuthService,
-    private router:Router,
-    //private toastr: ToastrService
-  ){
+    private router: Router,
+    private toastr: ToastrService
+  ) {
     this.form = this.fb.group({
-      email: ['',Validators.required],
-      password: ['',Validators.required]
-  });
+      email: new FormControl(null, [
+        Validators.required,
+        Validators.pattern("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+[.][a-z]{2,4}$")
+      ]),
+      password: new FormControl(null, [
+        //Validators.pattern('^(?=.*[0–9])(?=.*[a-zA-Z])([a-zA-Z0–9]+)$'),
+        Validators.required,
+        Validators.minLength(6),
+        Validators.maxLength(25)
+      ]),
+    });
+  }
+  get email() {
+    return this.form.get('email');
+  }
+  get password() {
+    return this.form.get('password');
   }
 
   ngOnInit() {
   }
 
+  signInWithEmail(): void {
+    const val = this.form.value;
+
+    this.authService.emailLogin(val.email, val.password);
+    localStorage.setItem('isLoggedin', 'true');
+    //Storage
+  }
+
+
+
+  /*
   login() {
-    if(this.form.invalid) {
+    if (this.form.invalid) {
       console.log("กรุณากรอกข้อมูลให้ครบ");
       return;
     }
 
-    const formValue = this.form.value;
-    this.authService.login(formValue.email, formValue.password)
+    let val = this.form.value;
+    this.authService.login(val.email, val.password)
       .subscribe(() => {
-        //this.toastr.success(formValue.email+' เข้าสู่ระบบสำเร็จ'),
+        this.toastr.success(val.email+' เข้าสู่ระบบ','สำเร็จ'),
         this.router.navigate(['/'])
       },
-        //err => this.toastr.error(err)
+        err => this.toastr.error(err)
       );
   }
+  */
 
-  signupClick(){
+  signupClick() {
     this.router.navigate(['/signup']);
   }
 

@@ -2,12 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
 import { AngularFireDatabase } from 'angularfire2/database';
 import { AuthService } from '../../shared/services/auth.service';
-//import { format } from 'url';
+import { routerTransition } from '../../router.animations';
 import { ToastrService } from 'ngx-toastr';
 @Component({
   selector: 'app-add-course',
   templateUrl: './add-course.component.html',
-  styleUrls: ['./add-course.component.scss']
+  styleUrls: ['./add-course.component.scss'],
+  animations: [routerTransition()]
 })
 export class AddCourseComponent implements OnInit {
 
@@ -35,7 +36,8 @@ export class AddCourseComponent implements OnInit {
     private afDb: AngularFireDatabase,
     private toastr: ToastrService,
   ) {
-    this.authUid = this.authService.authInfo$.value.$uid;
+    const authUid = this.authService.currentUserId;
+    //const authUid = this.authService.authInfo$.value.$uid;
     this.eventList = [
       { id: 'attendance', name: "Attendance", fn: true, isClick: true, isSelected: true },
       { id: 'quiz', name: "Quiz", fn: true, isClick: false, isSelected: true },

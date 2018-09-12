@@ -13,6 +13,7 @@ import {
 } from './components';
 
 import { StatModule } from '../../shared';
+import { DataService } from '../../shared/services/data/data.service'
 
 @NgModule({
     imports: [
@@ -29,6 +30,6 @@ import { StatModule } from '../../shared';
         NotificationComponent,
         ChatComponent,
     ],
-    providers: [ValueArrayPipe]
+    providers: [ValueArrayPipe,DataService]
 })
 export class DashboardModule {}

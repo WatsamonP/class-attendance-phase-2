@@ -26,7 +26,8 @@ export class SidebarComponent {
 		private authService: AuthService,
 		private afDb: AngularFireDatabase
 	) {
-    const authUid = this.authService.authInfo$.value.$uid;
+    const authUid = this.authService.currentUserId;
+    //const authUid = this.authService.authInfo$.value.$uid;
     this.userItem = afDb.object(`users/${authUid}/profile/`).valueChanges();
 
 		this.translate.addLangs(['en', 'fr', 'ur', 'es', 'it', 'fa', 'de']);

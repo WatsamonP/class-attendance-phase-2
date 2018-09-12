@@ -11,6 +11,8 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { ToastrModule } from 'ngx-toastr';
+import { HttpModule } from '@angular/http';
+
 //Firebase SET
 import { environment } from '../environments/environment';
 import { AngularFireModule } from 'angularfire2';
@@ -22,6 +24,8 @@ import { AuthService } from './shared/services/auth.service';
 import { AuthGuard } from './shared/guard/auth.guard';
 import { UserService } from './shared/services/user/user.service';
 import { ExcelService } from "./shared/services/excel/excel.service";
+import { DataService } from './shared/services/data/data.service';
+
 
 export const createTranslateLoader = (http: HttpClient) => {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -33,6 +37,7 @@ export const createTranslateLoader = (http: HttpClient) => {
     BrowserModule,
     BrowserAnimationsModule,
     HttpClientModule,
+    HttpModule,
     TranslateModule.forRoot({
       loader: {
         provide: TranslateLoader,
@@ -50,7 +55,7 @@ export const createTranslateLoader = (http: HttpClient) => {
     NgbModule.forRoot(),
   ],
   declarations: [AppComponent],
-  providers: [AuthService, AuthGuard, UserService, ExcelService],
+  providers: [AuthService, AuthGuard, UserService, ExcelService,DataService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

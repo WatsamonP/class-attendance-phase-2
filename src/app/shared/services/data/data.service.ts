@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { Http } from '@angular/http';
+import { Observable } from 'rxjs/Observable';
+
 
 @Injectable({
   providedIn: 'root'
@@ -11,14 +12,32 @@ export class DataService {
   found: boolean;
   myData: any[];
 
-  constructor(private httpClient: HttpClient, private http: Http){}
+  constructor(private _http: Http) { }
 
-  fetchData(){
-    //return this.http.get('https://classattendence-c4e10.firebaseio.com/users/.json').map(res:Response) => res.json().data);
-    return this.httpClient.get('https://classattendence-c4e10.firebaseio.com/users/.json')
+  getStudent(): Observable<any> {
+    return this._http
+      .get('https://classroomfeedback-57c36.firebaseio.com/users/.json')
+      .map(response => { 
+        return response.json(); 
+      });
   }
 
-  fetchFeedback(){
-    return this.httpClient.get('https://classroomfeedback-57c36.firebaseio.com/.json')
+  getFeedback(student_id, course_id): Observable<any> {
+    return this._http
+      //.get(`https://classattendence-c4e10.firebaseio.com/users/${student_id}/feedback/${course_id}/.json`)
+      .get(`https://classroomfeedback-57c36.firebaseio.com/users/${student_id}/feedback/${course_id}/.json`)
+      .map(response => { 
+        let obj = {student_id: student_id, feedback: response.json()}
+        return obj;
+      });
+  }
+
+  getStuddent(teacher, courseId, courseData, student_id): Observable<any> {
+    return this._http
+      .get(`https://classattendence-c4e10.firebaseio.com/users/${teacher.uid}/course/${courseId}/students/${student_id}.json`)
+      .map(response => { 
+        let obj = {teacher: teacher, course: courseData, student: response.json()}
+        return obj; 
+      });
   }
 }

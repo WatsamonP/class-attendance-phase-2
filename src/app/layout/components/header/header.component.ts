@@ -20,8 +20,10 @@ export class HeaderComponent implements OnInit {
     public router: Router,
     private authService: AuthService,
     private afDb: AngularFireDatabase) {
-    
-    const authUid = this.authService.authInfo$.value.$uid;
+
+
+    const authUid = this.authService.currentUserId;
+    //const authUid = this.authService.authInfo$.value.$uid;
     this.userItem = afDb.object(`users/${authUid}/profile/`).valueChanges();
 
 
@@ -67,6 +69,6 @@ export class HeaderComponent implements OnInit {
   }
 
   onClickSignOut() {
-    this.authService.logout()
+    this.authService.signOut()
   }
 }
