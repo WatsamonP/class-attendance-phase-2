@@ -25,7 +25,7 @@ export class SignupComponent implements OnInit {
   ) {
   }
 
-  ngOnInit() { 
+  ngOnInit() {
     this.buildForm();
   }
 
@@ -78,37 +78,15 @@ export class SignupComponent implements OnInit {
     return this.form.get('tel');
   }
 
-
-
-
-  signUp() {
+  signUpWithEmail() {
     if (this.form.invalid) {
-      console.log("กรุณากรอกข้อมูลให้ครบ");
-      //this.toastr.error("กรุณากรอกข้อมูลให้ครบทุกช่อง");
-      return;
+      return false
     }
 
     const val = this.form.value;
-
-    //this.authService.emailLogin(val.email, val.password)
-    //localStorage.setItem('isLoggedin', 'true');
-    //.then(
-      //this.userService.insertUser(val),
-      
-
-      //.subscribe(
-      //  () => {
-          
-          //this.toastr.success('สร้างบัญชีผู้ใช้งานสำเร็จ', 'สำเร็จ');
-          //this.authService.login(val.email, val.password)
-          //this.router.navigateByUrl('/');
-        //},
-        //err => {
-        //  this.toastr.error(err);
-        //}
-      //);
-    //)
+    this.authService.emailSignUp(val);
   }
+
 
   gotoLogin() {
     this.router.navigate(['/signin']);

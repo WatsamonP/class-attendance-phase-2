@@ -18,6 +18,7 @@ export class UserService {
 
   getUserList(){
     const authUid = this.authService.currentUserId;
+    console.log(authUid)
     //const authUid = this.authService.authInfo$.value.$uid;
     this.userList = this.db.object(`users/${authUid}/profile`);
     return this.userList;
@@ -34,7 +35,7 @@ export class UserService {
   }
 
   updateUser(user : any){
-    this.getUserList().set({
+    this.getUserList().update({
       email: user.email,
       firstName : user.firstName,
       lastName : user.lastName,

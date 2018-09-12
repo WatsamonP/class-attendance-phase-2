@@ -85,16 +85,18 @@ export class AuthService {
       })
       .catch(error => console.log(error));
   }
-  emailSignUp(email: string, password: string) {
-    return this.afAuth.auth.createUserWithEmailAndPassword(email, password)
+
+  emailSignUp(signUpForm) {
+    return this.afAuth.auth.createUserWithEmailAndPassword(signUpForm.email, signUpForm.password)
       .then((user) => {
         this.authState = user
-        //this.updateUserData();
+        this.updateUser(signUpForm);
+        this.toastr.success("สมัครสมาชิกสำเร็จ");
         this.router.navigate(['/'])
       })
       .catch((error) => {
         console.log(error);
-        this.toastr.warning(error);
+        this.toastr.warning(error,'Error !');
       });
   }
   emailLogin(email: string, password: string) {
@@ -106,7 +108,7 @@ export class AuthService {
       })
       .catch((error) => {
         console.log(error);
-        this.toastr.warning("email/password ไม่ถูกต้อง");
+        this.toastr.warning('Email หรือ Password ไม่ถูกต้อง','Error !');
       });
   }
   resetPassword(email: string) {
@@ -118,7 +120,7 @@ export class AuthService {
       })
       .catch((error) => {
         console.log(error);
-        this.toastr.warning("EMAIL นี้ยังไม่ได้ลงทะเบียน");
+        this.toastr.warning('Email นี้ยังไม่ได้ลงทะเบียน','Error !');
       });
   }
   getCurrentLoggedIn() {
@@ -130,18 +132,17 @@ export class AuthService {
   }
   signOut(): void {
     this.afAuth.auth.signOut();
-    this.router.navigate(['/login']);
+    this.router.navigate(['/signin']);
   }
 
-
-  private updateUserData(): void {
-    const path = `users/${this.currentUserId}/profile`; // Endpoint on firebase
-    const userRef: AngularFireObject<any> = this.db.object(path);
-    const data = {
-      email: this.authState.email
-    }
-    userRef.update(data)
-      .catch(error => console.log(error));
+  private updateUser(user : any){
+    this.db.object(`users/${this.afAuth.auth.currentUser.uid}/profile`).update({
+      email: user.email,
+      firstName : user.firstName,
+      lastName : user.lastName,
+      tel : user.tel,
+      username : user.username
+    });
   }
 
 }

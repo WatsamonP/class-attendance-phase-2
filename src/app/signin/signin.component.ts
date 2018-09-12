@@ -44,33 +44,16 @@ export class SigninComponent implements OnInit {
   ngOnInit() {
   }
 
-  signInWithEmail(): void {
-    const val = this.form.value;
-
-    this.authService.emailLogin(val.email, val.password);
-    localStorage.setItem('isLoggedin', 'true');
-    //Storage
-  }
-
-
-
-  /*
-  login() {
-    if (this.form.invalid) {
-      console.log("กรุณากรอกข้อมูลให้ครบ");
-      return;
+  signInWithEmail() {
+    if(this.form.invalid){
+      return false
     }
 
-    let val = this.form.value;
-    this.authService.login(val.email, val.password)
-      .subscribe(() => {
-        this.toastr.success(val.email+' เข้าสู่ระบบ','สำเร็จ'),
-        this.router.navigate(['/'])
-      },
-        err => this.toastr.error(err)
-      );
+    const val = this.form.value;
+    this.authService.emailLogin(val.email, val.password);
+    localStorage.setItem('isLoggedin', 'true');
   }
-  */
+
 
   signupClick() {
     this.router.navigate(['/signup']);
