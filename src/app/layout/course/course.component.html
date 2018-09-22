@@ -39,7 +39,7 @@
 
     <!--เพิ่ม/แก้ไขคะแนน นศ-->
     <form class="form-inline my-sm-0">
-      <button class="btn btn-outline-warning btn-sm" type="button" (click)="onClickCreateEventSlot(warningAlert)">
+      <button *ngIf="!isScoreEvent" class="btn btn-outline-warning btn-sm" type="button" (click)="onClickCreateEventSlot(warningAlert)">
         <i class="fa fa-plus" aria-hidden="true"></i>
       </button>
     </form>
@@ -160,8 +160,8 @@
 
 <!-- เพิ่มรายชื่อนักศึกษา -->
 <ng-template #insertStudent let-c="close" let-d="dismiss">
-  <div class="modal-header bg-secondary">
-    <h5 class="modal-title text-light" id="modal-basic-title">
+  <div class="modal-header">
+    <h5 class="modal-title" id="modal-basic-title">
       <i class="fa fa-warning" aria-hidden="true"></i>&nbsp;&nbsp;เพิ่มรายชื่อนักศึกษา
     </h5>
     <button type="button" class="close" aria-label="Close" (click)="d('Close click')">
@@ -198,39 +198,74 @@
   <div class="modal-body text-center">
     <form autocomplete="off" [formGroup]="insertStudentForm">
       <fieldset>
-        <div class="input-group" style="padding-bottom: 10px">
+        <div class="input-group">
           <div class="input-group-prepend">
-            <div class="input-group-text" id="btnGroupAddon">
-              <i class="material-icons">contact_mail</i>
+            <div class="input-group-text" id="btnGroupAddon" style="width:140px">
+              <i class="fa fa-address-card" aria-hidden="true"></i>&nbsp;รหัสนักศึกษา
             </div>
           </div>
-          <input type="text" formControlName="id" class="form-control" placeholder="รหัสนักศึกษา" aria-label="Input group example"
+          <input type="text" formControlName="id" class="form-control" placeholder="B58xxxxx" aria-label="Input group example" aria-describedby="btnGroupAddon">
+          <!-- Valid -->
+          <div *ngIf="insertStdId.value==null" class="input-group-append"></div>
+          <div *ngIf="insertStdId.value!=null && insertStdId.errors" class="input-group-append">
+            <label class="input-group-text bg-danger text-light">
+              <i class="fa fa-close" aria-hidden="true"></i></label>
+          </div>
+          <div *ngIf="insertStdId.valid" class="input-group-append">
+            <label class="input-group-text bg-success text-light" style="width: 40px">
+              <i class="fa fa-check" aria-hidden="true"></i></label>
+          </div>
+        </div>
+        <div style="padding-left:100px; padding-bottom: 10px">
+          <div *ngIf="insertStdId.value!=null && insertStdId.errors">
+            <label class=" text-danger" style="font-size:13px">
+              <i class="fa fa-close" aria-hidden="true"></i>ขึ้นต้นด้วย B, M หรือ D ตามตัวเลข 7 ตัว</label>
+          </div>
+        </div>
+        <!--///-->
+        <div class="input-group" style="padding-bottom: 10px">
+          <div class="input-group-prepend">
+            <div class="input-group-text" id="btnGroupAddon" style="width:140px">
+              <i class="fa fa-user" aria-hidden="true"></i>&nbsp;ชื่อ - นามสกุล
+            </div>
+          </div>
+          <input type="text" formControlName="name" class="form-control" placeholder="นายxxxx xxxx" aria-label="Input group example"
             aria-describedby="btnGroupAddon">
+          <!-- Valid -->
+          <div *ngIf="insertStdName.value==null" class="input-group-append"></div>
+          <div *ngIf="insertStdName.value!=null && insertStdName.errors" class="input-group-append">
+            <label class="input-group-text bg-danger text-light" style="width: 40px">
+              <i class="fa fa-close" aria-hidden="true"></i></label>
+          </div>
+          <div *ngIf="insertStdName.valid" class="input-group-append">
+            <label class="input-group-text bg-success text-light" style="width: 40px">
+              <i class="fa fa-check" aria-hidden="true"></i></label>
+          </div>
         </div>
         <!--///-->
         <div class="input-group" style="padding-bottom: 20px">
           <div class="input-group-prepend">
-            <div class="input-group-text" id="btnGroupAddon">
-              <i class="material-icons">vpn_key</i>
+            <div class="input-group-text" id="btnGroupAddon" style="width:140px">
+              <i class="fa fa-group" aria-hidden="true"></i>&nbsp;กลุ่มเรียน
             </div>
           </div>
-          <input type="text" formControlName="name" class="form-control" placeholder="ชื่อ - นามสกุล" aria-label="Input group example"
-            aria-describedby="btnGroupAddon">
-        </div>
-        <!--///-->
-        <div class="input-group" style="padding-bottom: 10px">
-          <div class="input-group-prepend">
-            <div class="input-group-text" id="btnGroupAddon">
-              <i class="material-icons">assignment_ind</i>
-            </div>
+          <input type="number" placeholder="ตัวเลขเท่านั้น" formControlName="group" class="form-control">
+          <!-- Valid -->
+          <div *ngIf="insertStdGroup.value==null" class="input-group-append"></div>
+          <div *ngIf="insertStdGroup.value!=null && insertStdGroup.errors" class="input-group-append">
+            <label class="input-group-text bg-danger text-light" style="width: 40px">
+              <i class="fa fa-close" aria-hidden="true"></i></label>
           </div>
-          <input type="number" placeholder="กลุ่มเรียน" formControlName="group" class="form-control">
+          <div *ngIf="insertStdGroup.valid" class="input-group-append">
+            <label class="input-group-text bg-success text-light" style="width: 40px">
+              <i class="fa fa-check" aria-hidden="true"></i></label>
+          </div>
         </div>
       </fieldset>
     </form>
   </div>
   <div class="card-footer text-muted text-right">
-    <button type="button" class="btn btn-success" (click)="onClickInsertStudentString()">บันทึกรายชื่อ</button>
+    <button [disabled]="!insertStudentForm.valid" type="button" class="btn btn-success" (click)="onClickInsertStudentString()">บันทึกรายชื่อ</button>
   </div>
 </ng-template>
 <!-- อัพโหลด csv -->
@@ -355,7 +390,7 @@
                   </div>
                 </div>
                 <input type="number" formControlName="{{dE.percentKey}}" class="form-control" placeholder="ตัวเลขเท่านั้น" aria-label="Input group example"
-                    aria-describedby="btnGroupAddon">
+                  aria-describedby="btnGroupAddon">
               </div>
             </div>
             <!-- Quiz -->
@@ -424,7 +459,6 @@
     </form>
   </div>
   <div class="card-footer text-muted text-right">
-    <button type="button" class="btn btn-warning" (click)="deleteCouse()">ลบ</button>
     <button type="button" class="btn btn-warning" (click)="onClickUpdateCourseData()">บันทึกการตั้งค่า</button>
   </div>
 </ng-template>

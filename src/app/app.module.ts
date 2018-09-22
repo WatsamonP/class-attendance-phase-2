@@ -25,7 +25,7 @@ import { AuthGuard } from './shared/guard/auth.guard';
 import { UserService } from './shared/services/user/user.service';
 import { ExcelService } from "./shared/services/excel/excel.service";
 import { DataService } from './shared/services/data/data.service';
-
+import { ReactionService } from './shared/services/reaction/reaction.service'
 
 export const createTranslateLoader = (http: HttpClient) => {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -55,7 +55,7 @@ export const createTranslateLoader = (http: HttpClient) => {
     NgbModule.forRoot(),
   ],
   declarations: [AppComponent],
-  providers: [AuthService, AuthGuard, UserService, ExcelService,DataService],
+  providers: [AuthService, AuthGuard, UserService, ExcelService,DataService, ReactionService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

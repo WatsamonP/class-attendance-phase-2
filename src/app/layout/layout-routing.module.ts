@@ -20,6 +20,7 @@ const routes: Routes = [
             { path: 'delete-course', loadChildren: './delete-course/delete-course.module#DeleteCourseModule' },
             { path: 'course/:id', loadChildren: './course/course.module#CourseModule' },
             { path: 'course/:id/:event', loadChildren: './course/course.module#CourseModule' },
+            { path: 'course/:id/:event/:group', loadChildren: './course/course.module#CourseModule' },
             { path: 'feedback/:id', loadChildren: './feedback/feedback.module#FeedbackModule' },
         ]
     }

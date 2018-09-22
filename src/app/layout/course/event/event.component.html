@@ -18,7 +18,26 @@
 
 <div class="row">
   <div class="col text-left">
-    <!--p>Show {{numberOfPage}} of {{numberOfAllPageShow}}</p-->
+    <div class="input-group input-group-sm mb-3">
+      <div class="input-group-prepend ">
+        <span class="input-group-text" id="inputGroup-sizing-sm">GROUP </span>
+      </div>
+      <div *ngIf="groupList.length!=1" ngbDropdown class="input-group-append">
+        <button type="button" class="btn btn-outline-secondary" ngbDropdownToggle>{{ studentGroupSelected }}</button>
+        <div ngbDropdownMenu>
+          <div *ngFor="let gx of groupList">
+            <button class="dropdown-item btn-sm">
+              <a class="dropdown-item" [routerLink]="['/course', courseParam, eventParam,  gx.id]">{{ gx.name }}</a>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="groupList.length==1" class="input-group-append">
+        <span class="input-group-text text-muted">Group 1
+          <span style="font-size: 12px">Course have only One Group</span>
+        </span>
+      </div>
+    </div>
   </div>
   <div class="col text-right">
     <ngb-pagination class="d-flex justify-content-end" size="sm" [collectionSize]="numberOfAllPage" [(page)]="numberOfPage" [maxSize]="5"
@@ -73,7 +92,7 @@
                 {{schedule.date | date:'h:mm:ss a'}}
               </div>
             </div>
-            <div class="row" style="padding-bottom: 12px">
+            <div *ngIf="eventParam !== 'attendance'" class="row" style="padding-bottom: 12px">
               <div class="col-6 text-right">
                 <i class="fa fa-file-text" aria-hidden="true"></i>&nbsp;คะแนนเต็ม :
               </div>
@@ -81,7 +100,7 @@
                 {{schedule.totalScore}} คะแนน
               </div>
             </div>
-            <div class="row" style="padding-bottom: 12px">
+            <div *ngIf="eventParam !== 'attendance'" class="row" style="padding-bottom: 12px">
               <div class="col-6 text-right">
                 <i class="fa fa-pencil-square text-primary" aria-hidden="true"></i>&nbsp;เปิดใช้งานการแก้ไขคะแนน
               </div>
@@ -90,14 +109,6 @@
               </div>
             </div>
           </div>
-          <!--div class="modal-footer row">
-            <div class="col text-left">
-              <button type="button" class="btn btn-outline-warning" (click)="d('Close click')">ยกเลิก</button>
-            </div>
-            <div class="col text-right">
-              <button type="button" class="btn btn-warning" (click)="c('Close click')">ตกลง</button>
-            </div>
-          </div-->
         </ng-template>
       </ng-template>
 
@@ -111,107 +122,161 @@
       </th>
     </tr>
   </thead>
+
+  <!------------------------------------------------------------------------------->
+  <!------------------------------------------------------------------------------->
+
   <tbody>
     <tr *ngFor="let student of studentList; let j = index;">
-      <th scope="row" style="width:70px; text-align: center">
-        <i class="fa fa-trash-o" (click)="onDeleteStudent(student.id)"></i>&nbsp;{{j+1}}
-      </th>
-      <td style="width:100px; text-align: center">{{student.id}}</td>
-      <td style="width:270px; text-align: center">{{student.name}}</td>
-      <td *ngIf="isShowGroup" class="white" style="width:50px; text-align: center">{{student.group}}</td>
-      <td *ngIf="isShowCountMiss" class="text-danger white" style="width:50px; text-align: center">{{missedClassCount[j]}}</td>
-      <!--ng-ng-container *ngFor="let miss of missedClassCount" *ngIf="isShowCountMiss" >
-        <td  style="width:50px; text-align: center">
-          {{ miss }}
+      <ng-container>
+        <th scope="row" style="width:70px; text-align: center">
+          <i class="fa fa-trash-o" (click)="onDeleteStudent(student.id)"></i>&nbsp;{{j+1}}
+        </th>
+        <td style="width:100px; text-align: center">{{student.id}}</td>
+        <td style="width:270px; text-align: center">{{student.name}}</td>
+        <td *ngIf="isShowGroup" class="white" style="width:50px; text-align: center">{{student.group}}</td>
+        <td *ngIf="isShowCountMiss" class="text-danger white" style="width:50px; text-align: center">{{missedClassCount[j]}}</td>
+        <!-------------------------------------------------------------------------------------->
+        <!-- Schedule Result-->
+        <ng-container *ngFor="let key of objectKeys(student[eventParam]); let k = index">
+          <td *ngIf="((numberOfPage-1) <= k/5) && (k/5 < numberOfPage) then normalScore">
+          </td>
+          <!-- Normal Score for !Attendance-->
+          <ng-template #normalScore>
+            <td *ngIf="(student[eventParam][key].score >= 1) && (eventParam!=='attendance'); else ontimeScore" class="white" style="width:60px ;text-align: center">
+              <!--form *ngIf="isFixScore && fixScoreIndex==k" style="width:80px" autocomplete="off" novalidate [formGroup]="changeScoreForm">
+                <fieldset [disabled]="formDisabled">
+                  <input type="text" class="form-control text-center" formControlName="changeScore" placeholder="{{ student[eventParam][key].score }}"
+                    (keyup.enter)="onChangeScore(student,key,k)">
+                </fieldset>
+              </form-->
+              <input *ngIf="isFixScore && fixScoreIndex==k" 
+                type="text" class="form-control text-center" style="width:80px" (keyup.enter)="onChangeScore(student,key,k,j)"
+                placeholder="{{ student[eventParam][key].score }}" [(ngModel)]="changeScore[j]">
+
+              <div *ngIf="!isFixScore">{{ student[eventParam][key].score }}</div>
+              <div *ngIf="isFixScore && fixScoreIndex !== k">{{ student[eventParam][key].score }}</div>
+            </td>
+          </ng-template>
+          <!--template show ontimeScore if Attendance-->
+          <ng-template #ontimeScore>
+            <td *ngIf="(student[eventParam][key].score >= 1) && (eventParam=='attendance'); else lateScore" class="green" style="width:60px ;text-align: center">
+              <!--form *ngIf="isFixScore && fixScoreIndex==k" style="width:80px" autocomplete="off" novalidate [formGroup]="changeScoreForm">
+                <fieldset [disabled]="formDisabled">
+                  <input type="text" class="form-control text-center" formControlName="changeScore" placeholder="{{ student[eventParam][key].score }}"
+                    (keyup.enter)="onChangeScore(student,key,k)">
+                </fieldset>
+              </form-->
+              <div *ngIf="!isFixScore">{{ student[eventParam][key].score }}</div>
+              <div *ngIf="isFixScore && fixScoreIndex !== k">{{ student[eventParam][key].score }}</div>
+            </td>
+          </ng-template>
+          <!--template show lateScore if Attendance-->
+          <ng-template #lateScore>
+            <td *ngIf="(student[eventParam][key].score == 0.5) && (eventParam=='attendance'); else missScore" class="yell" style="width:60px ;text-align: center">
+              <!--form *ngIf="isFixScore && fixScoreIndex==k" style="width:80px" autocomplete="off" novalidate [formGroup]="changeScoreForm">
+                <fieldset [disabled]="formDisabled">
+                  <input type="text" class="form-control text-center" formControlName="changeScore" placeholder="{{ student[eventParam][key].score }}"
+                    (keyup.enter)="onChangeScore(student,key,k)">
+                </fieldset>
+              </form-->
+              <div *ngIf="!isFixScore">{{ student[eventParam][key].score }}</div>
+              <div *ngIf="isFixScore && fixScoreIndex !== k">{{ student[eventParam][key].score }}</div>
+            </td>
+          </ng-template>
+          <!--template show score = 0-->
+          <ng-template #missScore>
+            <td *ngIf="student[eventParam][key].score == 0;" class="red text-danger" style="width:60px;text-align: center">
+              <input *ngIf="isFixScore && fixScoreIndex==k" 
+                type="text" class="form-control text-center" style="width:80px" (keyup.enter)="onChangeScore(student,key,k,j)"
+                placeholder="{{ student[eventParam][key].score }}" [(ngModel)]="changeScore[j]">
+              <!--form *ngIf="isFixScore && fixScoreIndex==k" style="width:80px" autocomplete="off" novalidate [formGroup]="changeScoreForm">
+                <fieldset [disabled]="formDisabled">
+                  <input type="text" class="form-control text-center" formControlName="changeScore" placeholder="{{ student[eventParam][key].score }}"
+                    (keyup.enter)="onChangeScore(student,key,k)">
+                </fieldset>
+              </form-->
+              <div *ngIf="!isFixScore">{{ student[eventParam][key].score }}</div>
+              <div *ngIf="isFixScore && fixScoreIndex !== k">{{ student[eventParam][key].score }}</div>
+            </td>
+          </ng-template>
+        </ng-container>
+        <!-- END Schedule Result-->
+        <td *ngIf="isShowPercent" class="blue text-primary" style="width:70px; text-align: center">
+          {{ percentageScore[j] | number : '1.2-2' }}
         </td>
-      </ng-container-->
-      <!-------------------------------------------------------------------------------------->
-      <!-- Schedule Result-->
-      <ng-container *ngFor="let key of objectKeys(student[eventParam]); let k = index">
-        <td *ngIf="((numberOfPage-1) <= k/5) && (k/5 < numberOfPage) then normalScore">
-        </td>
-        <!-- Normal Score for !Attendance-->
-        <ng-template #normalScore>
-          <td *ngIf="(student[eventParam][key].score >= 1) && (eventParam!=='attendance'); else ontimeScore" class="white" style="width:60px ;text-align: center">
-            <form *ngIf="isFixScore && fixScoreIndex==k" style="width:80px" autocomplete="off" novalidate [formGroup]="changeScoreForm">
-              <fieldset [disabled]="formDisabled">
-                <input type="text" class="form-control text-center" formControlName="changeScore" placeholder="{{ student[eventParam][key].score }}"
-                  (keyup.enter)="onChangeScore(student,key,k)">
-              </fieldset>
-            </form>
-            <div *ngIf="!isFixScore">{{ student[eventParam][key].score }}</div>
-            <div *ngIf="isFixScore && fixScoreIndex !== k">{{ student[eventParam][key].score }}</div>
-          </td>
-        </ng-template>
-        <!--template show ontimeScore if Attendance-->
-        <ng-template #ontimeScore>
-          <td *ngIf="(student[eventParam][key].score >= 1) && (eventParam=='attendance'); else lateScore" class="green" style="width:60px ;text-align: center">
-            <form *ngIf="isFixScore && fixScoreIndex==k" style="width:80px" autocomplete="off" novalidate [formGroup]="changeScoreForm">
-              <fieldset [disabled]="formDisabled">
-                <input type="text" class="form-control text-center" formControlName="changeScore" placeholder="{{ student[eventParam][key].score }}"
-                  (keyup.enter)="onChangeScore(student,key,k)">
-              </fieldset>
-            </form>
-            <div *ngIf="!isFixScore">{{ student[eventParam][key].score }}</div>
-            <div *ngIf="isFixScore && fixScoreIndex !== k">{{ student[eventParam][key].score }}</div>
-          </td>
-        </ng-template>
-        <!--template show lateScore if Attendance-->
-        <ng-template #lateScore>
-          <td *ngIf="(student[eventParam][key].score == 0.5) && (eventParam=='attendance'); else missScore" class="yell" style="width:60px ;text-align: center">
-            <form *ngIf="isFixScore && fixScoreIndex==k" style="width:80px" autocomplete="off" novalidate [formGroup]="changeScoreForm">
-              <fieldset [disabled]="formDisabled">
-                <input type="text" class="form-control text-center" formControlName="changeScore" placeholder="{{ student[eventParam][key].score }}"
-                  (keyup.enter)="onChangeScore(student,key,k)">
-              </fieldset>
-            </form>
-            <div *ngIf="!isFixScore">{{ student[eventParam][key].score }}</div>
-            <div *ngIf="isFixScore && fixScoreIndex !== k">{{ student[eventParam][key].score }}</div>
-          </td>
-        </ng-template>
-        <!--template show score = 0-->
-        <ng-template #missScore>
-          <td *ngIf="student[eventParam][key].score == 0;" class="red text-danger" style="width:60px;text-align: center">
-            <form *ngIf="isFixScore && fixScoreIndex==k" style="width:80px" autocomplete="off" novalidate [formGroup]="changeScoreForm">
-              <fieldset [disabled]="formDisabled">
-                <input type="text" class="form-control text-center" formControlName="changeScore" placeholder="{{ student[eventParam][key].score }}"
-                  (keyup.enter)="onChangeScore(student,key,k)">
-              </fieldset>
-            </form>
-            <div *ngIf="!isFixScore">{{ student[eventParam][key].score }}</div>
-            <div *ngIf="isFixScore && fixScoreIndex !== k">{{ student[eventParam][key].score }}</div>
-          </td>
-        </ng-template>
       </ng-container>
-      <!-- END Schedule Result-->
-      <td *ngIf="isShowPercent" class="blue text-primary" style="width:70px; text-align: center">
-        {{ percentageScore[j] | number : '1.2-2' }}
-      </td>
     </tr>
 
-    <!--  XXXXXXXX  XXXXXXX  XXXXXXXX  XXXXXXX  XX
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <!-- 
+      XXXXXXXX  XXXXXXX  XXXXXXXX  XXXXXXX  XX
          XX     XX   XX     XX     XX   XX  XX
          XX     XX   XX     XX     XXXXXXX  XX
          XX     XX   XX     XX     XX   XX  XX
          XX     XXXXXXX     XX     XX   XX  XXXXXXX
--->
+    -->
     <!--Total Row------------------------------------------------------------------------>
     <!-- IF !ATTENFANCE-->
-    <tr *ngIf="eventParam !== 'attendance'" class="bg-light">
+    <tr *ngIf="eventParam !== 'attendance' && !isGroupFilter" class="bg-light">
       <td colspan="3" style="width:70px; text-align: center">Total</td>
       <td *ngIf="isShowGroup"></td>
       <td *ngIf="isShowCountMiss"></td>
       <ng-template ngFor let-schedule [ngForOf]="scheduleList" let-i="index">
         <td *ngIf="((numberOfPage-1) <= i/5) && (i/5 < numberOfPage)" style="width:50px ;text-align: center">
-          {{ schedule.count }}
+          {{ schedule.count }}/{{studentList.length}}
         </td>
       </ng-template>
       <td *ngIf="isShowPercent"></td>
     </tr>
     <!-- END IF !ATTENFANCE-->
+    <!-- IF !ATTENFANCE FOR GROUP-->
+    <tr *ngIf="eventParam !== 'attendance' && isGroupFilter" class="bg-light">
+      <td colspan="3" style="width:70px; text-align: center">Total</td>
+      <td *ngIf="isShowGroup"></td>
+      <td *ngIf="isShowCountMiss"></td>
+      <ng-template ngFor let-group [ngForOf]="groupCount" let-i="index">
+        <td *ngIf="((numberOfPage-1) <= i/5) && (i/5 < numberOfPage)" style="width:50px ;text-align: center">
+          {{ group }}/{{studentList.length}}
+        </td>
+      </ng-template>
+      <td *ngIf="isShowPercent"></td>
+    </tr>
+    <!-- END IF !ATTENFANCE FOR GROUP -->
+
+
+
+
+
     <!----------------------------------------------------------------------------------->
     <!--IF ATTENDANCE [[ ON TIME ]]-->
-    <tr *ngIf="eventParam=='attendance'" class="green">
+    <tr *ngIf="eventParam=='attendance' && !isGroupFilter" class="green">
       <td colspan="3" style="width:70px; text-align: right">มาเรียนตรงเวลา</td>
       <td *ngIf="isShowGroup"></td>
       <td *ngIf="isShowCountMiss"></td>
@@ -223,7 +288,7 @@
       <td *ngIf="isShowPercent"></td>
     </tr>
     <!--IF ATTENDANCE [[ LATE ]]-->
-    <tr *ngIf="eventParam=='attendance'" class="yell">
+    <tr *ngIf="eventParam=='attendance' && !isGroupFilter" class="yell">
       <td colspan="3" style="width:70px; text-align: right">มาเรียนสาย</td>
       <td *ngIf="isShowGroup"></td>
       <td *ngIf="isShowCountMiss"></td>
@@ -235,7 +300,7 @@
       <td *ngIf="isShowPercent"></td>
     </tr>
     <!--IF ATTENDANCE [[ MISS CLASS ]]-->
-    <tr *ngIf="eventParam=='attendance'" class="red">
+    <tr *ngIf="eventParam=='attendance' && !isGroupFilter" class="red">
       <td colspan="3" style="width:70px; text-align: right">ขาดเรียน</td>
       <td *ngIf="isShowGroup"></td>
       <td *ngIf="isShowCountMiss"></td>
@@ -247,7 +312,7 @@
       <td *ngIf="isShowPercent"></td>
     </tr>
     <!--IF ATTENDANCE [[ LEAVE ]]-->
-    <tr *ngIf="eventParam=='attendance'" class="yell">
+    <tr *ngIf="eventParam=='attendance' && !isGroupFilter" class="yell">
       <td colspan="3" style="width:70px; text-align: right">ลา</td>
       <td *ngIf="isShowGroup"></td>
       <td *ngIf="isShowCountMiss"></td>
@@ -259,9 +324,74 @@
       <td *ngIf="isShowPercent"></td>
     </tr>
     <!-- END IF ATTENFANCE-->
+
+    <!--IF ATTENDANCE [[ ON TIME ]]-->
+    <tr *ngIf="eventParam=='attendance' && isGroupFilter" class="green">
+      <td colspan="3" style="width:70px; text-align: right">มาเรียนตรงเวลา</td>
+      <td *ngIf="isShowGroup"></td>
+      <td *ngIf="isShowCountMiss"></td>
+      <ng-template ngFor let-group [ngForOf]="groupCount" let-i="index">
+        <td *ngIf="((numberOfPage-1) <= i/5) && (i/5 < numberOfPage)" style="width:50px ;text-align: center">
+          {{ group.countOnTime }}
+        </td>
+      </ng-template>
+      <td *ngIf="isShowPercent"></td>
+    </tr>
+    <!--IF ATTENDANCE [[ LATE ]]-->
+    <tr *ngIf="eventParam=='attendance' && isGroupFilter" class="yell">
+      <td colspan="3" style="width:70px; text-align: right">มาเรียนสาย</td>
+      <td *ngIf="isShowGroup"></td>
+      <td *ngIf="isShowCountMiss"></td>
+      <ng-template ngFor let-group [ngForOf]="groupCount" let-i="index">
+        <td *ngIf="((numberOfPage-1) <= i/5) && (i/5 < numberOfPage)" style="width:50px ;text-align: center">
+          {{ group.countLate }}
+        </td>
+      </ng-template>
+      <td *ngIf="isShowPercent"></td>
+    </tr>
+    <!--IF ATTENDANCE [[ MISS CLASS ]]-->
+    <tr *ngIf="eventParam=='attendance' && isGroupFilter" class="red">
+      <td colspan="3" style="width:70px; text-align: right">ขาดเรียน</td>
+      <td *ngIf="isShowGroup"></td>
+      <td *ngIf="isShowCountMiss"></td>
+      <ng-template ngFor let-group [ngForOf]="groupCount" let-i="index">
+        <td *ngIf="((numberOfPage-1) <= i/5) && (i/5 < numberOfPage)" style="width:50px ;text-align: center">
+          {{ group.countMiss }}
+        </td>
+      </ng-template>
+      <td *ngIf="isShowPercent"></td>
+    </tr>
+    <!--IF ATTENDANCE [[ LEAVE ]]-->
+    <tr *ngIf="eventParam=='attendance' && isGroupFilter" class="yell">
+      <td colspan="3" style="width:70px; text-align: right">ลา</td>
+      <td *ngIf="isShowGroup"></td>
+      <td *ngIf="isShowCountMiss"></td>
+      <ng-template ngFor let-group [ngForOf]="groupCount" let-i="index">
+        <td *ngIf="((numberOfPage-1) <= i/5) && (i/5 < numberOfPage)" style="width:50px ;text-align: center">
+          {{ group.countLeave }}
+        </td>
+      </ng-template>
+      <td *ngIf="isShowPercent"></td>
+    </tr>
+    <!-- END IF ATTENFANCE-->
+
+
+
+
+
+
   </tbody>
 </table>
 <!-- TABLE-->
+
+
+
+
+
+
+
+
+
 <!----------------------------------------------------------------------------------->
 
 <!-- Popup ถามว่าต้องการบันทึกคะแนนซ้ำไหม-->

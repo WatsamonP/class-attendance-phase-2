@@ -36,7 +36,7 @@ export class AddCourseComponent implements OnInit {
     private afDb: AngularFireDatabase,
     private toastr: ToastrService,
   ) {
-    const authUid = this.authService.currentUserId;
+    this.authUid = this.authService.currentUserId;
     //const authUid = this.authService.authInfo$.value.$uid;
     this.eventList = [
       { id: 'attendance', name: "Attendance", fn: true, isClick: true, isSelected: true },
@@ -155,11 +155,6 @@ export class AddCourseComponent implements OnInit {
     this.afDb.object(`users/${this.authUid}/course/${val.id}/eventList/score`)
       .update({ id: 'score', name: "Score", fn: true, isClick: false })
     // จำเป็นต้องมี
-    //this.afDb.object(`users/${this.authUid}/course/${val.id}/eventList/attendance`)
-    //  .update({ id: 'attendance', name: "Attendance", fn: true, isClick: true })
-    //this.afDb.object(`users/${this.authUid}/course/${val.id}`)
-    //  .update({ percentAtt: 0 })
-    // อื่นๆ
 
     for (var i = 0; i < this.eventList.length; i++) {
       if (this.eventList[i].isSelected) {
@@ -177,51 +172,11 @@ export class AddCourseComponent implements OnInit {
         continue;
       }
     }
-    /*
-    if (this.eventList[0].isSelected) {
-      this.afDb.object(`users/${this.authUid}/course/${val.id}/eventList/attendance`)
-        .update({ id: 'attendance', name: "Attendance", fn: true, isClick: false })
-      this.afDb.object(`users/${this.authUid}/course/${val.id}`)
-        .update({ percentAtt: 0 })
-    }
-    
-    if (this.eventList[1].isSelected) {
-      this.afDb.object(`users/${this.authUid}/course/${val.id}/eventList/quiz`)
-        .update({ id: 'quiz', name: "Quiz", fn: true, isClick: false })
-      this.afDb.object(`users/${this.authUid}/course/${val.id}`)
-        .update({ percentQuiz: 0 })
-    }
-    if (this.eventList[2].isSelected) {
-      this.afDb.object(`users/${this.authUid}/course/${val.id}/eventList/hw`)
-        .update({ id: 'hw', name: "Homework", fn: true, isClick: false })
-      this.afDb.object(`users/${this.authUid}/course/${val.id}`)
-        .update({ percentHw: 0 })
-    }
-    if (this.eventList[3].isSelected) {
-      this.afDb.object(`users/${this.authUid}/course/${val.id}/eventList/lab`)
-        .update({ id: 'lab', name: "Lab", fn: true, isClick: false })
-      this.afDb.object(`users/${this.authUid}/course/${val.id}`)
-        .update({ percentLab: 0 })
-    }
-    if (this.eventList[4].isSelected) {
-      this.afDb.object(`users/${this.authUid}/course/${val.id}/eventList/exercise`)
-        .update({ id: 'exercise', name: "Exercise", fn: true, isClick: false })
-      this.afDb.object(`users/${this.authUid}/course/${val.id}`)
-        .update({ percentExercise: 0 })
-    }
-    if (this.eventList[5].isSelected) {
-      this.afDb.object(`users/${this.authUid}/course/${val.id}/eventList/assignment`)
-        .update({ id: 'assignment', name: "Assignment", fn: true, isClick: false })
-      this.afDb.object(`users/${this.authUid}/course/${val.id}`)
-        .update({ percentAssign: 0 })
-    }
-    if (this.eventList[6].isSelected) {
-      this.afDb.object(`users/${this.authUid}/course/${val.id}/eventList/project`)
-        .update({ id: 'project', name: "Project", fn: true, isClick: false })
-      this.afDb.object(`users/${this.authUid}/course/${val.id}`)
-        .update({ percentProject: 0 })
-    }
-    */
+
+    this.afDb.object(`users/${this.authUid}/course/${val.id}/group/all`).update({
+      id: 'all',
+      name: 'All Group',
+    });
 
   }
 

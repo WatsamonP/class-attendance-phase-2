@@ -2,49 +2,261 @@
   <h2 class="text-muted">Dashboard <small>Statistics Overview</small></h2>
 
   <div *ngFor="let course of courseList; let i = index">
-    <div class="card">
-      <div class="card-header">
-        <div class="row">
-          <div class="col-8 text-left"><b>
-              <p style="display:inline; font-size: 20px">{{ i+1 }}&nbsp;
-                <i class="fa fa-angle-right" aria-hidden="true"></i>&nbsp;
-              </p>
-              <p style="display:inline; font-size: 20px">{{ course.id }} | {{ course.name }}</p></b>
+    <div style="padding:10px">
+      <div class="container">
+
+        <button *ngIf="!expandList[i].expanded" (click)="expandedCourseDashboard(i)" type="button" class="btn btn-light btn-lg btn-block">
+          <div class="row">
+            <div class="col text-left">
+              <i class="fa fa-calendar-check-o" aria-hidden="true"></i>&nbsp; {{course.trimester}}/{{course.year}}
+            </div>
+            <div class="col">
+              {{ course.id }} : {{ course.name }}
+            </div>
+            <div class="col text-right"><i class="fa fa-angle-double-down" aria-hidden="true"></i></div>
           </div>
-          <div class="col-4 text-right">
-            <button type="button" class="btn btn-warning" (click)="test(course.students)">
-              <i class="fa fa-arrow-right" aria-hidden="true"></i>&nbsp; คลิกเข้าสู่รายวิชา
-            </button>
+        </button>
+
+        <button *ngIf="expandList[i].expanded" (click)="expandedCourseDashboard(i)" type="button" class="btn btn-primary btn-lg btn-block">
+          <div class="row">
+            <div class="col text-left">
+              <i class="fa fa-calendar-check-o" aria-hidden="true"></i>&nbsp; {{course.trimester}}/{{course.year}}
+            </div>
+            <div class="col">
+              {{ course.id }} : {{ course.name }}
+            </div>
+            <div class="col text-right"><i class="fa fa-angle-double-up" aria-hidden="true"></i></div>
+          </div>
+        </button>
+
+        <div *ngIf="expandList[i].expanded">
+          <div style="padding:10px"></div>
+          <div class="row">
+            <div class="col">
+              <div class="card">
+                <!-- HEADER -->
+                <div class="card-header text-right text-danger" *ngIf="lastAttendance[i].date == undefined">
+                  Not found <b>Attendnace</b>
+                </div>
+                <div class="card-header text-right text-danger" style="font-size:20px" *ngIf="lastAttendance[i].date !== undefined">
+                  <i class="fa fa-clock-o " aria-hidden="true"></i>
+                  {{ lastAttendance[i].date | date: 'mediumDate' }}
+                  &nbsp;&nbsp;&nbsp;
+                  {{ lastAttendance[i].date | date: 'mediumTime' }}
+                </div>
+                <!-- END HEADER -->
+                <!-- BODY -->
+                <div class="card-body">
+                  <div *ngIf="feedbackLastList[i].rating == 0" class="text-danger text-center">
+                    Not found Feedback <b>Feeling</b><br><br>
+                  </div>
+                  <div class="wrapper" *ngIf="feedbackLastList[i].rating !== 0">
+                    <table class="table">
+                      <thead>
+                        <tr class="text-center">
+                          <th scope="col">
+                            <img [src]="emojiPathPng('crazy-text')" width='25px'>
+                          </th>
+                          <th scope="col">
+                            <img [src]="emojiPathPng('cry-text')" width='25px'>
+                          </th>
+                          <th scope="col">
+                            <img [src]="emojiPathPng('dead-text')" width='25px'>
+                          </th>
+                          <th scope="col">
+                            <img [src]="emojiPathPng('cry-smile-text')" width='25px'>
+                          </th>
+                          <th scope="col">
+                            <img [src]="emojiPathPng('smile-text')" width='25px'>
+                          </th>
+                          <th scope="col">
+                            <img [src]="emojiPathPng('love-text')" width='25px'>
+                          </th>
+                          <th scope="col">
+                            <img [src]="emojiPathPng('bored-text')" width='25px'>
+                          </th>
+                          <th scope="col">
+                            <img [src]="emojiPathPng('sleep-text')" width='25px'>
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr class="text-center">
+                          <td scope="row">{{feedbackLastList[i].rating.count0}}</td>
+                          <td>{{feedbackLastList[i].rating.count1}}</td>
+                          <td>{{feedbackLastList[i].rating.count2}}</td>
+                          <td>{{feedbackLastList[i].rating.count3}}</td>
+                          <td>{{feedbackLastList[i].rating.count4}}</td>
+                          <td>{{feedbackLastList[i].rating.count5}}</td>
+                          <td>{{feedbackLastList[i].rating.count6}}</td>
+                          <td>{{feedbackLastList[i].rating.count7}}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+
+                  <div class="row">
+                    <div class="col-8">
+                      <div class="card">
+                        <div class="card-body">
+                          <div *ngIf="feedbackLastList[i].comment.length == 0" class="text-danger text-center">
+                            Not found Feedback <b>Comment</b>
+                          </div>
+                          <div *ngIf="feedbackLastList[i].comment.length !== 0">
+                            <h5 class="card-title">FEEDBACK</h5>
+                            <div *ngFor="let comment of feedbackLastList[i].comment; let c = index">
+                              <li>{{c+1}} : {{comment}}</li>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-4">
+                      <div *ngIf="lastAttendance[i].date !== undefined">
+                        <div class="card">
+                          <div class="card-body">
+                            <div class="row">
+                              <div class="col-6">
+                                <div class="card bg-success text-light">
+                                  <div class="card-body text-center" style="font-size:40px">
+                                    <p style="font-size:16px">ON TIME</p>
+                                    {{ lastAttendance[i].countOnTime }}
+                                  </div>
+                                </div>
+                                <br>
+                                <p class="text-center"><b>LATE : </b> {{ lastAttendance[i].countLate }}</p>
+                              </div>
+                              <div class="col-6">
+                                <div class="card bg-danger text-light">
+                                  <div class="card-body text-center" style="font-size:40px">
+                                    <p style="font-size:18px">MISSED</p>
+                                    {{ lastAttendance[i].countMiss }}
+                                  </div>
+                                </div>
+                                <br>
+                                <p class="text-center"><b>LEAVE : </b> {{ lastAttendance[i].countLeave }}</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+
+
+          </div>
+
+
+          <div style="padding: 10px"></div>
+
+
+          <div class="row" *ngIf="chartData[i].length !== 0">
+            <div class="col">
+              <div class="card">
+                <div class="card-body">
+                  <h5 class="card-title">CHART</h5>
+                  <canvas baseChart [colors]="chartColors" [datasets]="chartData[i]" [labels]="chartLabels[i]" [options]="barChartOptions"
+                    [legend]="barChartLegend" [chartType]="barChartType" (chartHover)="chartHovered($event)" (chartClick)="chartClicked($event)">
+                  </canvas>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
+
+
+
+
+
+
+
       </div>
-      <div class="card-body">
-        <div class="row">
-          <div class="col-4">
-            <p>
-              <i class="fa fa-calendar-check-o" aria-hidden="true"></i>&nbsp; ปีการศึกษา : {{course.trimester}}/{{course.year}}
-            </p>
-            <p *ngIf="!isEmptyObject(course.students)">
-              <i class="fa fa-users" aria-hidden="true"></i>&nbsp; จำนวนนักศึกษา : {{ objectKeys(course.students).length
-              }}
-            </p>
-            <p *ngIf="isEmptyObject(course.students)" class="text-danger" style="font-size:14px">
-              <i class="fa fa-users" aria-hidden="true"></i>&nbsp; ยังไม่มีการเพิ่มรายชื่อนักศึกษา
-            </p>
+      <div style="padding: 10px"></div>
+    </div>
+    <!--div class="card">
+          <div class="card-header">
+            <div class="row">
+              <div class="col-8 text-left"><b>
+                  <p style="display:inline; font-size: 20px">{{ i+1 }}&nbsp;
+                    <i class="fa fa-angle-right" aria-hidden="true"></i>&nbsp;
+                  </p>
+                  <p style="display:inline; font-size: 20px">{{ course.id }} | {{ course.name }}</p></b>
+              </div>
+              <div class="col-4 text-right">
+                <button type="button" class="btn btn-warning" (click)="test(course.students)">
+                  <i class="fa fa-arrow-right" aria-hidden="true"></i>&nbsp; คลิกเข้าสู่รายวิชา
+                </button>
+              </div>
+            </div>
           </div>
-          <div class="col-8">
-            <ul class="list-group">
-              <li class="list-group-item d-flex justify-content-between align-items-center">
-                FEEDBACK
-              </li>
-              <li class="list-group-item d-flex justify-content-between align-items-center">
-                {{ ( feedbackListObservable | async ) }}
-              </li>
-              <a href="#" class="btn btn-default btn-block">View All Feedbacks</a>
-            </ul>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-4">
+                <p>
+                  <i class="fa fa-calendar-check-o" aria-hidden="true"></i>&nbsp; ปีการศึกษา : {{course.trimester}}/{{course.year}}
+                </p>
+                <p *ngIf="!isEmptyObject(course.students)">
+                  <i class="fa fa-users" aria-hidden="true"></i>&nbsp; จำนวนนักศึกษา : {{ objectKeys(course.students).length
+                  }}
+                </p>
+                <p *ngIf="isEmptyObject(course.students)" class="text-danger" style="font-size:14px">
+                  <i class="fa fa-users" aria-hidden="true"></i>&nbsp; ยังไม่มีการเพิ่มรายชื่อนักศึกษา
+                </p>
+              </div>
+              <div class="col-8">
+                <ul class="list-group">
+                  <li class="list-group-item d-flex justify-content-between align-items-center">
+                    FEEDBACK
+                  </li>
+                  <li class="list-group-item d-flex justify-content-between align-items-center">
+                    {{ ( feedbackListObservable | async ) }}
+                  </li>
+                  <a href="#" class="btn btn-default btn-block">View All Feedbacks</a>
+                </ul>
+              </div>
+            </div>
+            <div *ngIf="!isEmptyObject(course.Feedback)">
+              <div class="card">
+                <div class="card-header">
+                  FEEDBACK COMMENT
+                </div>
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-md-6">
+                      <ul class="list-group">
+                        <li *ngFor="let comment of fbLast.comment" class="list-group-item d-flex justify-content-between align-items-center">
+                          {{ comment }}
+                        </li>
+                        <a href="#" class="btn btn-default btn-block">View All Feedbacks</a>
+                      </ul>
+                    </div>
+                    <div class="col-md-6">
+                      <canvas baseChart height="150px" [data]="pieChartData" [labels]="pieChartLabels" [chartType]="pieChartType" (chartHover)="chartHovered($event)"
+                        (chartClick)="chartClicked($event)" [colors]="pieChartColors">
+                      </canvas>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-        <!--div *ngIf="isEmptyObject(course.schedule)" class="text-danger" style="font-size:14px">
+        </div-->
+  </div>
+</div>
+
+
+
+
+
+<!--div *ngIf="isEmptyObject(course.schedule)" class="text-danger" style="font-size:14px">
           <i class="fa fa-users" aria-hidden="true"></i>&nbsp; ยังไม่มีข้อมูล Attendance
         </div>
         <div *ngIf="!isEmptyObject(course.schedule)"  class="card mb-3">
@@ -58,12 +270,3 @@
           </div>
         </div>
       </div-->
-
-      </div>
-      <div class="card-footer text-muted">
-        ...
-      </div>
-      <br>
-      <hr><br>
-    </div>
-  </div>

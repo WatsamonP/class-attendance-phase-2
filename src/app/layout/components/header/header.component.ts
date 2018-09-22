@@ -26,7 +26,6 @@ export class HeaderComponent implements OnInit {
     console.log(authUid)
     //const authUid = this.authService.authInfo$.value.$uid;
     this.userItem = afDb.object(`users/${authUid}/profile/`).valueChanges();
-    this.userItem.subscribe(res => console.log(res))
 
     this.translate.addLangs(['en', 'fr', 'ur', 'es', 'it', 'fa', 'de', 'zh-CHS']);
     this.translate.setDefaultLang('en');

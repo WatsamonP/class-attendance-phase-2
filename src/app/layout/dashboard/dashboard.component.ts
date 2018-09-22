@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input, OnDestroy } from '@angular/core';
 import { routerTransition } from '../../router.animations';
 import { AngularFireDatabase, AngularFireObject, AngularFireList } from 'angularfire2/database';
 import { AuthService } from "../../shared/services/auth.service";
@@ -7,6 +7,8 @@ import * as moment from 'moment';
 import { MessageService } from '../../shared/services/messageService';
 import { DataService } from '../../shared/services/data/data.service'
 import { format } from 'url';
+import { ReactionService } from '../../shared/services/reaction/reaction.service';
+
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
@@ -25,6 +27,7 @@ export class DashboardComponent implements OnInit {
   myKey: any;
   chartLabels: any;
   chartData: any;
+
   barList: any;
   feedbackList: any;
   itemFeedback: any;
@@ -32,36 +35,126 @@ export class DashboardComponent implements OnInit {
   lastAttendance: any;
   courseAttendance: any;
   feedbackAttendanceList: any;
+  feedbackLastList: any;
+
+  feelingChart: any;
+  feelingLabel: any;
+
+  ///
+  //
+  pieChartLabels: any;
+  pieChartData: any;
+  pieChartType: any;
+  pieChartColors: any;
+
+  itemExpandHeight: number;
+
+  @Input() itemId: string;
+  showEmojis = false;
+  emojiList: string[];
+  reactionCount: any;
+  userReaction: any;
+  subscription: any;
+  hoverIndex: Number;
+  clickIndex: Number;
+  isSelectCourse: boolean = false;
+  expandList: any;
+  lastExpandIndex: Number = -1;
 
   constructor(
     private authService: AuthService,
     private afDb: AngularFireDatabase,
     private _messageService: MessageService,
+    private reactionSvc: ReactionService,
     private _dataService: DataService) {
 
+    this.itemExpandHeight = 300;
     const authUid = this.authService.currentUserId;
     //const authUid = this.authService.authInfo$.value.$uid;
     this.courseList = [];
+    this.feedbackList = [];
+    this.feedbackLastList = [];
+    this.expandList = [];
     afDb.list(`users/${authUid}/course/`).snapshotChanges().map(actions => {
       return actions.map(action => ({ key: action.key, ...action.payload.val() }));
     }).subscribe(items => {
       this.courseList = items;
+      let object = {}
+      let commentList = []
+      let ratingObject = {}
+      let count0 = 0, count1 = 0, count2 = 0, count3 = 0, count4 = 0, count5 = 0, count6 = 0, count7
+      for (var i = 0; i < this.courseList.length; i++) {
+        this.expandList.push({ expanded: false })
+        object = {}
+        ratingObject = {}
+        commentList = []
+        count0 = 0; count1 = 0; count2 = 0; count3 = 0; count4 = 0; count5 = 0; count6 = 0; count7 = 0;
+        if (this.courseList[i].Feedback !== undefined) {
+          let fbKey = Object.keys(this.courseList[i].Feedback)
+          //for(var j=0; j<fbKey.length; j++){
+          let commentOb = Object.keys(this.courseList[i].Feedback[fbKey[fbKey.length - 1]].comment)
+          let ratingOb = Object.keys(this.courseList[i].Feedback[fbKey[fbKey.length - 1]].rating)
+          let comment;
+          let rating;
+
+          for (var k = 0; k < commentOb.length; k++) {
+            comment = this.courseList[i].Feedback[fbKey[fbKey.length - 1]].comment[commentOb[k]];
+            commentList.push(comment)
+          }
+          for (var k = 0; k < ratingOb.length; k++) {
+            rating = this.courseList[i].Feedback[fbKey[fbKey.length - 1]].rating[ratingOb[k]];
+            if (rating == 0) {
+              count0++;
+            } else if (rating == 1) {
+              count1++;
+            } else if (rating == 2) {
+              count2++;
+            } else if (rating == 3) {
+              count3++;
+            } else if (rating == 4) {
+              count4++;
+            } else if (rating == 5) {
+              count5++;
+            } else if (rating == 6) {
+              count6++;
+            } else if (rating == 7) {
+              count7++;
+            } else {
+              console.log('ERROR')
+            }
+          }
+          ratingObject = {
+            count0: count0, count1: count1, count2: count2, count3: count3,
+            count4: count4, count5: count5, count6: count6, count7: count7,
+          }
+          object = { comment: commentList, rating: ratingObject }
+          //}
+        } else {
+          object = { comment: [], rating: 0 }
+        }
+        this.feedbackLastList.push(object)
+        console.log(this.feedbackLastList)
+      }
       this.getBarChartData();
-      this.getAttendanceConfig(authUid);
-      console.log(this.courseAttendance)
+      this.getFeelingChart();
+      this.getLastAttendance();
+      //this.getAttendanceConfig(authUid);
+      console.log(this.courseList)
       return items.map(item => item.key);
+
+      //this.emojiList = this.reactionSvc.emojiList;
+      /*
+            this.subscription = this.reactionSvc.getReactions(this.itemId)
+              .valueChanges()
+              .subscribe(reactions => {
+                //this.reactionCount = this.reactionSvc.countReactions(reactions)
+                //this.userReaction = this.reactionSvc.userReaction(reactions)
+              })
+              */
     });
 
     this.feedbackListObservable = afDb.object(`Feedbacktest`).valueChanges();
 
-    /*
-    afDb.list(`Feedbacktest`).snapshotChanges().map(actions => {
-			return actions.map(action => ({ key: action.key, ...action.payload.val() }));
-		}).subscribe(items => {
-      this.feedbackList = items;
-			return items.map(item => item.key);
-    });
-    */
     this.sliders.push(
       {
         imagePath: 'assets/images/slider1.jpg',
@@ -103,8 +196,75 @@ export class DashboardComponent implements OnInit {
   }
 
   ngOnInit() {
-    console.log(this.lastAttendance)
+    console.log(this.expandList)
+    //console.log(this.lastAttendance)
   }
+
+  getAttendanceConfig(authUid) {
+    let lasAttendance = [];
+    let temp: any;
+    this.feedbackAttendanceList = [];
+    for (var i = 0; i < this.courseList.length; i++) {
+      let attendanceConfig: any;
+      let course_id = this.courseList[i].id;
+      this.afDb.object(`users/${authUid}/course/${course_id}`).valueChanges()
+        .subscribe(res => {
+          temp = res;
+        })
+      lasAttendance.push(temp)
+    }
+
+
+    console.log(lasAttendance)
+  }
+
+
+  public expandedCourseDashboard(index) {
+    if (this.lastExpandIndex == index) {
+      this.expandList[index].expanded = false;
+      this.lastExpandIndex = -1;
+    } else {
+      for (var i = 0; i < this.expandList.length; i++) {
+        if (index == i) {
+          this.lastExpandIndex = i;
+          this.expandList[i].expanded = true;
+        } else {
+          this.expandList[i].expanded = false;
+        }
+      }
+    }
+
+
+
+
+
+
+
+
+    //this.isSelectCourse = !this.isSelectCourse;
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   setDefault() {
     console.log('set')
@@ -135,9 +295,9 @@ export class DashboardComponent implements OnInit {
         this._dataService.getFeedback(tempStudent[i], course_id)
           .subscribe((resFeedback) => {
             if (resFeedback.feedback !== null) {
-              if (resFeedback.feedback[attendancekey[attendancekey.length-1]] !== undefined) {
+              if (resFeedback.feedback[attendancekey[attendancekey.length - 1]] !== undefined) {
                 //console.log(resFeedback.feedback[attendancekey[attendancekey.length-1]])
-                let index = resFeedback.feedback[attendancekey[attendancekey.length-1]].rating;
+                let index = resFeedback.feedback[attendancekey[attendancekey.length - 1]].rating;
                 this.lastAttendance[index].count = Number(this.lastAttendance[index].count) + 1;
                 this.lastAttendance[8].feeling = course_id;
               }
@@ -153,104 +313,54 @@ export class DashboardComponent implements OnInit {
     })
   }
 
-  getAttendanceConfig(authUid) {
-    //this.setDefault();
-    this.feedbackAttendanceList = [];
+  getLastAttendance() {
+    this.lastAttendance = [];
+    let temp = {};
     for (var i = 0; i < this.courseList.length; i++) {
-      let attendanceConfig: any;
-      let course_id = this.courseList[i].id;
-      this.afDb.object(`users/${authUid}/course/${course_id}`).valueChanges()
-        .subscribe(res => {
-          let temp: any = res;
-          attendanceConfig = temp.schedule.attendance;
-          let attendancekey = Object.keys(attendanceConfig)
-          for (var j = 0; j < attendancekey.length; j++) {
-
-            //this.setDefault()
-            //console.log(course_id, attendancekey[j])
-            this.getFeedback(course_id, attendancekey)
-          }
-          //this.clear();
-        })
-    }
-    /*
-    let tempStudent;
-    for (var j = 0; j < this.courseList.length; j++) {
-      this.courseAttendance = [];
-      this.itemFeedback = this.afDb.object(`users/${authUid}/course/${this.courseList[j].id}`).valueChanges();
-      let course_id = this.courseList[j].id;
-      this.itemFeedback.subscribe(res => {
-        this.attendanceObject = res.schedule.attendance;
-        let attendancekey = Object.keys(res.schedule.attendance);
-        this._dataService.getStudent().subscribe(resStd => {
-          tempStudent = Object.keys(resStd);
-          this.lastAttendance = [
-            { index: 0, feeling: 'ยากมาก', count: 0 },
-            { index: 1, feeling: 'ยาก', count: 0 },
-            { index: 2, feeling: 'ไม่โอเค', count: 0 },
-            { index: 3, feeling: 'โอเค', count: 0 },
-            { index: 4, feeling: 'ดี', count: 0 },
-            { index: 5, feeling: 'ดีมาก', count: 0 },
-            { index: 6, feeling: 'น่าเบื่อ', count: 0 },
-            { index: 7, feeling: 'ง่วง', count: 0 }
-          ]
-          for (var i = 0; i < tempStudent.length; i++) {
-            this._dataService.getFeedback(tempStudent[i], course_id)
-              .subscribe((resFeedback) => {
-                // แต่ละ Courseรันตามจำนวนนักศึกษา
-                if (resFeedback !== null) {
-                  if (resFeedback[attendancekey[attendancekey.length - 1]] !== undefined) {
-                    
-                    let index = resFeedback[attendancekey[attendancekey.length - 1]].rating;
-                    //let feeling = resFeedback[attendancekey[attendancekey.length - 1]].feeling;
-                    //console.log(feeling)
-                    this.lastAttendance[index].count = Number(this.lastAttendance[index].count) + 1;
-                  }
-                }else{
-                  console.log('ยังไม่มี Feeback')
-                }
-              })
-          }
-          console.log(course_id,this.lastAttendance)
-          //this.courseAttendance[j] = this.lastAttendance
-          //console.log(j, this.courseAttendance[j])
-        })
-      })
-    }
-    */
-  }
-
-  setStudent(res) {
-    if (res == null) {
-      return false
-    }
-
-    let obj = {};
-    let attFeedback = Object.keys(res)
-    console.log(attFeedback.length)
-    for (var i = 0; i < attFeedback.length; i++) {
-      //console.log(res[String(attFeedback)].AttendanceId)
-      console.log(attFeedback)
-    }
-    /*
-    for (var i = 0; i < courseKey.length; i++) {
-      this._courseService.getStudent(res.teacher, courseKey[i], res.course[courseKey[i]], this.student_id).subscribe((resStudent) => {
-        if (resStudent.student !== null) {
-          console.log(resStudent)
-          this.studentlist.push(resStudent)
-          this.isNotFound = false;
+      temp = {};
+      if (this.courseList[i].schedule == undefined || this.courseList[i].schedule.attendance == undefined) {
+        temp = {
+          countMiss: 0,
+          countLate: 0,
+          countOnTime: 0,
+          countLeave: 0
         }
-      })
+      } else {
+        let attKey = Object.keys(this.courseList[i].schedule.attendance)
+        temp = {
+          countMiss: this.courseList[i].schedule.attendance[attKey[attKey.length - 1]].countMiss,
+          countLate: this.courseList[i].schedule.attendance[attKey[attKey.length - 1]].countLate,
+          countOnTime: this.courseList[i].schedule.attendance[attKey[attKey.length - 1]].countOnTime,
+          countLeave: this.courseList[i].schedule.attendance[attKey[attKey.length - 1]].countLeave,
+          date: this.courseList[i].schedule.attendance[attKey[attKey.length - 1]].date,
+        }
+      }
+      this.lastAttendance.push(temp)
     }
-    */
-    this.feedbackList.push(obj)
+    console.log(this.lastAttendance)
   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   isEmptyObject(obj) {
     return (obj == undefined || obj == null);
   }
 
   getBarChartData() {
+    this.lastAttendance = []
     this.barList = [];
     this.chartLabels = [];
     this.chartData = []
@@ -304,12 +414,12 @@ export class DashboardComponent implements OnInit {
         this.chartLabels.push(labels);
         this.chartData.push(dataSet);
       } else {
-        this.barList.push(['ไม่มีจ้า'])
-        this.chartLabels.push(['ไม่มีจ้า']);
-        this.chartData.push(['ไม่มีจ้า']);
+        this.barList.push([])
+        this.chartLabels.push([]);
+        this.chartData.push([]);
       }
     }
-    //console.log(this.chartData);
+    console.log(this.chartData);
     //console.log(testSet);
   }
 
@@ -389,7 +499,7 @@ export class DashboardComponent implements OnInit {
   }
 
   public chartHovered(e: any): void {
-    // console.log(e);
+    this.emojiPath('fb-like')
   }
 
   public randomize(): void {
@@ -413,5 +523,51 @@ export class DashboardComponent implements OnInit {
      * assign it;
      */
   }
+
+
+
+  react(val) {
+    if (this.userReaction === val) {
+      this.reactionSvc.removeReaction(this.itemId)
+    } else {
+      this.reactionSvc.updateReaction(this.itemId, val)
+    }
+  }
+
+  toggleShow() {
+    this.showEmojis = !this.showEmojis
+  }
+
+
+  emojiPath(emoji) {
+    return `assets/reactions/${emoji}.svg`
+  }
+
+  emojiPathPng(emoji) {
+    return `assets/reactions/${emoji}.png`
+  }
+
+  //hasReactions(index) {
+  //  return _.get(this.reactionCount, index.toString())
+  //}
+
+  getFeelingChart() {
+    let tempLabel;
+    let tempData;
+    this.pieChartLabels = ['crazy ' + "<img [src]=emojiPath('fb-like) width='45px>"
+      , 'cry', 'dead', 'cry-smile', 'smile', 'love', 'bored', 'sleep']
+    this.pieChartData = [300, 500, 100, 300, 500, 100, 2, 2];
+    this.pieChartType = 'pie';
+    this.pieChartColors = [
+      'rgba(226, 47, 47, 0.4)', 'rgba(226, 47, 47, 0.4)', 'rgba(226, 47, 47, 0.4)', 'rgba(226, 47, 47, 0.4)',
+      'rgba(226, 47, 47, 0.4)', 'rgba(226, 47, 47, 0.4)', 'rgba(226, 47, 47, 0.4)', 'rgba(226, 47, 47, 0.4)',
+    ]
+  }
+
+  // Pie
+  //public pieChartLabels: 
+  //  string[] = ['crazy','cry', 'dead', 'cry-smile', 'smile', 'love','bored', 'sleep']
+  //public pieChartData: number[] = [300, 500, 100,300, 500, 100,2,2];
+  //public pieChartType: string = 'pie';
 
 }
