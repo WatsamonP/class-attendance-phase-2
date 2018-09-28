@@ -1,5 +1,5 @@
-import { Component, OnInit, Input, ViewEncapsulation, ChangeDetectorRef } from '@angular/core';
-import { EventComponent } from './event/event.component'
+import { Component, OnInit, Input, ViewEncapsulation, ViewChild } from '@angular/core';
+import { EventComponent } from './table/event/event.component'
 import { Router, ParamMap, ActivatedRoute, } from '@angular/router';
 import { Observable } from 'rxjs';
 import { NgbModal, ModalDismissReasons, NgbAlert, NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
@@ -10,6 +10,8 @@ import * as moment from 'moment';
 import { MessageService } from '../../shared/services/messageService'
 import { FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
+import { ExportService } from '../../shared/services/excel/export.service'
+import { ExcelService } from '../../shared/services/excel/excel.service'
 
 @Component({
   selector: 'app-course',
@@ -44,6 +46,7 @@ export class CourseComponent implements OnInit {
   //courseList: any;
   courseParam: any;
   eventParam: string;
+  groupParam: String;
   eventList: any;
   //eventModel: EventModel;
   //model = 1;
@@ -68,6 +71,7 @@ export class CourseComponent implements OnInit {
   dynamicEvent: any;
   //
   isScoreEvent: boolean = false;
+  userInsertNewEvent: String;
 
 
   constructor(
@@ -79,6 +83,8 @@ export class CourseComponent implements OnInit {
     private _messageService: MessageService,
     private fb: FormBuilder,
     private toastr: ToastrService,
+    private _exportService: ExportService,
+    private _excelService: ExcelService
   ) {
     //init auth UID
     this.authUid = this.authService.currentUserId;
@@ -87,6 +93,7 @@ export class CourseComponent implements OnInit {
       let cId = params.get('id');
       this.courseParam = params.get('id');
       this.eventParam = String(params.get('event'));
+      this.groupParam = String(params.get('group'));
       if (this.eventParam == 'score') {
         this.isScoreEvent = true;
       } else {
@@ -216,7 +223,7 @@ export class CourseComponent implements OnInit {
 
   messageToEvent(e, course) {
     let event = e.key;
-    this.router.navigate(['/course', course, event,'all']);
+    this.router.navigate(['/course', course, event, 'all']);
   }
 
   // เมื่อคลิก บันทึกการตั้งค่า 
@@ -436,7 +443,7 @@ export class CourseComponent implements OnInit {
     this.csv = "";
   }
 
-  setGroupNo(arr){
+  setGroupNo(arr) {
     let maxGroup = Math.max(...arr)
 
     this.afDb.object(`users/${this.authUid}/course/${this.courseParam}`).update({
@@ -538,6 +545,36 @@ export class CourseComponent implements OnInit {
     }
   }
 
+  public exportExcel() {
+    console.log('นำข้อมูลออก')
+    //this._excelService.exportAsExcelFile([],'sample')
+    //console.log(this._exportService.
+
+    this._exportService.exportAsXLSX(this.courseParam, this.groupParam);
+
+  }
+
+  public onClickUserInsertEvent() {
+    let eventInput = String(this.userInsertNewEvent);
+    if (/\s/.test(eventInput)) {
+      // It has any kind of whitespace
+      this.toastr.error('ไม่อนุญาตให้มีช่องว่างในชื่อรายการ', 'มีช่องว่าง')
+      return false;
+    }
+
+    let id = eventInput.toLowerCase();
+    let list = { id: id, name: eventInput, fn: true, isClick: false };
+
+    this.afDb.object(`users/${this.authUid}/course/${this.courseParam}/eventList/${list.id}`)
+      .update(list)
+    let pString = String('percent' + list.name);
+    var obj = { [pString]: 0 }
+    this.afDb.object(`users/${this.authUid}/course/${this.courseParam}`)
+      .update(obj)
+  }
+
+
+
 
   // XXXXXXX  XXXXXXX  XXXXXXX  XX    XX    XX       XX  XXXXXXX  XXXXX    XXXXXXX  XX
   // XX   XX  XX   XX  XX       XXX   XX    XXX     XXX  XX   XX  XX   XX  XX   XX  XX
@@ -551,6 +588,9 @@ export class CourseComponent implements OnInit {
 
   public openTools(content) {
     this.modalService.open(content, { centered: true });
+  }
+  public openToolsLg(content) {
+    this.modalService.open(content, { centered: true, size: 'lg' });
   }
 
   public openEvent(content) {

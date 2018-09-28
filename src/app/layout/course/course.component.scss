@@ -1,4 +1,7 @@
 body { padding: 30px; }
+.bg-black{
+  background-color: #222;
+}
 
 @mixin can-toggle-branding(
   $can-toggle-off-color: #777, 

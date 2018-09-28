@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgbCarouselModule, NgbAlertModule } from '@ng-bootstrap/ng-bootstrap';
-import { ValueArrayPipe } from '../../shared/pipes/ValueArrayPipe';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { ChartsModule as Ng2Charts } from 'ng2-charts';
 import { DashboardRoutingModule } from './dashboard-routing.module';
@@ -31,6 +30,6 @@ import { DataService } from '../../shared/services/data/data.service'
         NotificationComponent,
         ChatComponent,
     ],
-    providers: [ValueArrayPipe,DataService]
+    providers: [DataService]
 })
 export class DashboardModule {}

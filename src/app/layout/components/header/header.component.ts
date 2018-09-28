@@ -23,7 +23,7 @@ export class HeaderComponent implements OnInit {
 
 
     const authUid = this.authService.currentUserId;
-    console.log(authUid)
+    //console.log(authUid)
     //const authUid = this.authService.authInfo$.value.$uid;
     this.userItem = afDb.object(`users/${authUid}/profile/`).valueChanges();
 

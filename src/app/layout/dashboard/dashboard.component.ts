@@ -564,6 +564,26 @@ export class DashboardComponent implements OnInit {
     ]
   }
 
+  buttonOutlineStyle = [
+    'btn-outline-primary','btn-outline-success','btn-outline-danger','btn-outline-warning','btn-outline-info',
+    'btn-outline-primary','btn-outline-success','btn-outline-danger','btn-outline-warning','btn-outline-info'
+  ];
+
+  buttonStyle = [
+    'btn-primary', 'btn-success', 'btn-danger', 'btn-warning', 'btn-info',
+    'btn-primary', 'btn-success', 'btn-danger', 'btn-warning', 'btn-info'
+  ];
+
+  borderStyle = [
+    'border-primary', 'border-success', 'border-danger', 'border-warning', 'border-info',
+    'border-primary', 'border-success', 'border-danger', 'border-warning', 'border-info'
+  ];
+
+  classColor = [
+    'text-primary', 'text-success', 'text-danger', 'text-warning', 'text-info',
+    'text-primary', 'text-success', 'text-danger', 'text-warning', 'text-info',
+  ]
+
   // Pie
   //public pieChartLabels: 
   //  string[] = ['crazy','cry', 'dead', 'cry-smile', 'smile', 'love','bored', 'sleep']

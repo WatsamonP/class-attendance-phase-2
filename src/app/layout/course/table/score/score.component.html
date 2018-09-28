@@ -1,0 +1,91 @@
+<div class="row">
+  <div class="col text-left">
+    <div class="input-group input-group-sm mb-3">
+      <div class="input-group-prepend ">
+        <span class="input-group-text" id="inputGroup-sizing-sm">GROUP </span>
+      </div>
+      <div *ngIf="groupList.length!=1" ngbDropdown class="input-group-append">
+        <button type="button" class="btn btn-outline-secondary" ngbDropdownToggle>{{ studentGroupSelected }}</button>
+        <div ngbDropdownMenu>
+          <div *ngFor="let gx of groupList">
+            <button class="dropdown-item btn-sm">
+              <a class="dropdown-item" [routerLink]="['/course', courseParam, 'score',  gx.id]">{{ gx.name }}</a>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="groupList.length==1" class="input-group-append">
+        <span class="input-group-text text-muted">Group 1
+          <span style="font-size: 12px">Course have only One Group</span>
+        </span>
+      </div>
+    </div>
+  </div>
+  <div class="col text-right">
+      <p class="text-muted" style="font-size:12px">แสดงรายชื่อนักศึกษา</p>
+      <ui-switch [(ngModel)]="isShowStudentsName" color="#FF8800" switchColor="#FF8800" (change)="sendMessageToStudentsName()"></ui-switch>
+  </div>
+</div>
+
+
+<table class="table table-responsive text-dark table-hover" *ngIf="isNotShowData">
+  <thead>
+    <tr>
+      <th style="width:70px; text-align: center">#</th>
+      <th style="width:100px; text-align: center">ID</th>
+      <th *ngIf="isShowStudentsName" style="width:270px; text-align: center">ชื่อ-นามสกุล</th>
+      <ng-container *ngFor="let dE of dynamicEvent">
+        <th style="width:80px; text-align: center">
+          <button class="btn btn-light" placement="top" ngbTooltip="{{ dE.name }} {{ dE.percent }} % ">
+            <b>{{ dE.name.charAt(0) }}</b>
+          </button>
+        </th>
+      </ng-container>
+      <th style="width:80px; text-align: center">
+        <button class="btn btn-light" placement="top" ngbTooltip="{{ configTotalPercent }} % ">
+          <b>Total</b>
+        </button>
+      </th>
+      <th style="width:80px; text-align: center">
+        <button class="btn btn-light" (click)="configGrade(configGrade)">
+          <b>Grade</b>
+        </button>
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let student of studentList; let s = index;">
+      <ng-container>
+        <th scope="row" style="width:70px; text-align: center">
+          {{s+1}}
+        </th>
+        <td style="width:100px; text-align: center">{{student.id}}</td>
+        <td *ngIf="isShowStudentsName" style="width:270px; text-align: center">{{student.name}}</td>
+        <ng-container *ngFor="let dE of dynamicEvent">
+          <td *ngIf="student.score[dE.id] == undefined || student.score[dE.id] == null; then notFound else found">
+          </td>
+          <ng-template #found>
+            <td style="width:80px; text-align: center">
+              {{ student.score[dE.id] }}
+            </td>
+          </ng-template>
+          <ng-template #notFound>
+            <td tyle="width:80px; text-align: center" class="text-center">
+              <button class="text-danger btn bg-trans" placement="top" ngbTooltip="ยังไม่มีคะแนนในส่วนนี้">
+                0
+              </button>
+            </td>
+          </ng-template>
+        </ng-container>
+        <td style="width:80px; text-align: center">{{ totalPercent[s] }}</td>
+        <td style="width:80px; text-align: center">{{ studentGrade[s] }}</td>
+
+      </ng-container>
+    </tr>
+  </tbody>
+</table>
+
+
+<ng-template #configGrade let-c="close" let-d="dismiss">
+  แก้ไข Grading Scheme
+</ng-template>

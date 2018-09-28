@@ -126,6 +126,13 @@
       <div class="bg-light athiti" style="font-size:12;padding: 8px">
         <i class="fa fa-list" aria-hidden="true"></i>&nbsp;<b>รายการเก็บคะแนน</b>
       </div>
+      <div class="text-danger" style="font-size:8 ;padding: 8px">
+        <i class="fa fa-warning" aria-hidden="true"></i>&nbsp;
+          สงวนคำว่า <b>"Attendance"</b> สำหรับการเช็คชื่อเข้าเรียนเท่านั้น (สามารถตรวจสอบสถานะเข้าเรียนได้)
+        <br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;นอกเหนือจากนี้ จะบันทึกคะแนนธรรมดา
+      </div>
+
 
 
       <div class="row" style="padding-top: 10px">
@@ -134,7 +141,7 @@
             <li class="list-group-item text-info text-center">
               รายการ
             </li>
-           
+
             <li *ngFor="let e of eventInit" (click)="onClickinsertEvent(e)" style="height: 40px;" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
               {{ e.name }}
               <small class="text-muted">

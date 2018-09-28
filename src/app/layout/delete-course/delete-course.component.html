@@ -8,6 +8,11 @@
   <nav class="navbar navbar-light bg-light">
     <a class="navbar-brand" href="#">
       <i class="fa fa-list" aria-hidden="true"></i>&nbsp;<B>จัดการรายวิชา</B></a>
+    <ul class="navbar-nav ml-auto">
+      <button type="button" class="btn btn-success" [routerLink]="['/add-course']">
+          <i class="fa fa-fw fa-book"></i> {{ 'สร้างรายวิชาใหม่' }}
+      </button>
+    </ul>
   </nav>
 </body>
 
@@ -22,7 +27,7 @@
         <th style="width:100px; text-align: center">รหัสวิชา</th>
         <th style="width:370px; text-align: center">ชื่อวิชา</th>
         <th style="width:100px; text-align: center">จำนวนนักศึกษา</th>
-        <th tyle="width:200px; text-align: center">ลบ</th>
+        <th tyle="width:200px; text-align: center">ลบรายวิชา</th>
       </tr>
     </thead>
     <tbody>
@@ -35,8 +40,8 @@
         <td *ngIf="!isEmptyObject(course.students)" style="width:100px; text-align: center">
           {{ objectKeys(course.students).length}}</td>
         <td tyle="width:200px; text-align: center">
-          <button type="button" class="btn btn-danger" (click)="onClickDelete(course.id)">
-            <i class="fa fa-trash" aria-hidden="true"></i>&nbsp; ลบรายวิชา
+          <button type="button" class="btn btn-danger" (click)="onClickDelete(course)">
+            <i class="fa fa-trash" aria-hidden="true"></i>
           </button>
         </td>
       </tr>
@@ -44,3 +49,28 @@
     </tbody>
   </table>
 </div>
+
+<ng-template #deleteCourse let-c="close" let-d="dismiss">
+    <div class="modal-header bg-warning">
+      <h5 class="modal-title" id="modal-basic-title">
+        <i class="fa fa-warning" aria-hidden="true"></i>&nbsp;&nbsp;WARNING
+      </h5>
+      <button type="button" class="close" aria-label="Close" (click)="d('Close click')">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body text-center">
+      <h6>ต้องการลบรายวิชา </h6>
+      {{ deleteMessage.id }} : {{ deleteMessage.name }}
+      <hr>
+      <p class="text-danger">เมื่อลบแล้วจะไม่สามารถกู้คืนได้</p>
+    </div>
+    <div class="modal-footer row">
+      <div class="col text-left">
+        <button type="button" class="btn btn-outline-warning" (click)="d('Close click')">ยกเลิก</button>
+      </div>
+      <div class="col text-right">
+        <button type="button" class="btn btn-warning" (click)="c('Close click')">ตกลง</button>
+      </div>
+    </div>
+  </ng-template>

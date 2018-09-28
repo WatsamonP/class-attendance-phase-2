@@ -1,2 +1,18 @@
+<nav class="navbar navbar-expand-sm navbar-light bg-light">
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">
+      <li style="font-size:20px">
+        <i class="fa fa-star" aria-hidden="true"></i>&nbsp;
+        <b>FEEDBACK</b> 
+        {{ ( courseItem | async)?.id }} : {{ (courseItem | async)?.name }}
+      </li>
+    </ul>
 
-<h5>FEEDBACK</h5>
+    <form class="form-inline my-sm-0">
+    </form>
+  </div>
+</nav>
+
+<hr>
+
+<app-timeline></app-timeline>

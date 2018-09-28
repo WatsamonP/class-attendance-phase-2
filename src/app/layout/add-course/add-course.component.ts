@@ -25,6 +25,8 @@ export class AddCourseComponent implements OnInit {
     { id: 'exercise', name: "Exercise", fn: false, isClick: false, isSelected: false },
     { id: 'assignment', name: "Assignment", fn: false, isClick: false, isSelected: false },
     { id: 'project', name: "Project", fn: false, isClick: false, isSelected: false },
+    { id: 'midterm', name: "Midterm", fn: false, isClick: false, isSelected: false },
+    { id: 'final', name: "Final", fn: false, isClick: false, isSelected: false }
   ]
   eventList = [];
   eventInput: String;

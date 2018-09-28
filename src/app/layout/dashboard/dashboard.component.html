@@ -1,11 +1,11 @@
 <div [@routerTransition]>
   <h2 class="text-muted">Dashboard <small>Statistics Overview</small></h2>
-
+  <hr>
   <div *ngFor="let course of courseList; let i = index">
-    <div style="padding:10px">
+    <div style="padding:2px">
       <div class="container">
 
-        <button *ngIf="!expandList[i].expanded" (click)="expandedCourseDashboard(i)" type="button" class="btn btn-light btn-lg btn-block">
+        <button *ngIf="!expandList[i].expanded" (click)="expandedCourseDashboard(i)" type="button" class="btn {{ buttonOutlineStyle[i] }} btn-lg btn-block">
           <div class="row">
             <div class="col text-left">
               <i class="fa fa-calendar-check-o" aria-hidden="true"></i>&nbsp; {{course.trimester}}/{{course.year}}
@@ -17,7 +17,7 @@
           </div>
         </button>
 
-        <button *ngIf="expandList[i].expanded" (click)="expandedCourseDashboard(i)" type="button" class="btn btn-primary btn-lg btn-block">
+        <button *ngIf="expandList[i].expanded" (click)="expandedCourseDashboard(i)" type="button" class="btn {{ buttonStyle[i] }} btn-lg btn-block">
           <div class="row">
             <div class="col text-left">
               <i class="fa fa-calendar-check-o" aria-hidden="true"></i>&nbsp; {{course.trimester}}/{{course.year}}
@@ -30,19 +30,17 @@
         </button>
 
         <div *ngIf="expandList[i].expanded">
-          <div style="padding:10px"></div>
+          <div style="padding:3px"></div>
           <div class="row">
             <div class="col">
-              <div class="card">
+              <div class="card {{ borderStyle[i] }}">
                 <!-- HEADER -->
                 <div class="card-header text-right text-danger" *ngIf="lastAttendance[i].date == undefined">
                   Not found <b>Attendnace</b>
                 </div>
-                <div class="card-header text-right text-danger" style="font-size:20px" *ngIf="lastAttendance[i].date !== undefined">
+                <div class="card-header text-right {{ classColor[i] }} " style="font-size:20px" *ngIf="lastAttendance[i].date !== undefined">
                   <i class="fa fa-clock-o " aria-hidden="true"></i>
-                  {{ lastAttendance[i].date | date: 'mediumDate' }}
-                  &nbsp;&nbsp;&nbsp;
-                  {{ lastAttendance[i].date | date: 'mediumTime' }}
+                  {{ lastAttendance[i].date | date: 'mediumDate' }} &nbsp;&nbsp;&nbsp; {{ lastAttendance[i].date | date: 'mediumTime' }}
                 </div>
                 <!-- END HEADER -->
                 <!-- BODY -->
@@ -106,7 +104,7 @@
                           <div *ngIf="feedbackLastList[i].comment.length !== 0">
                             <h5 class="card-title">FEEDBACK</h5>
                             <div *ngFor="let comment of feedbackLastList[i].comment; let c = index">
-                              <li>{{c+1}} : {{comment}}</li>
+                              <li>{{comment}}</li>
                             </div>
                           </div>
                         </div>
@@ -120,8 +118,8 @@
                             <div class="row">
                               <div class="col-6">
                                 <div class="card bg-success text-light">
-                                  <div class="card-body text-center" style="font-size:40px">
-                                    <p style="font-size:16px">ON TIME</p>
+                                  <div class="card-body text-center" style="font-size:30px">
+                                    <p style="font-size:14px">ON TIME</p>
                                     {{ lastAttendance[i].countOnTime }}
                                   </div>
                                 </div>
@@ -130,8 +128,8 @@
                               </div>
                               <div class="col-6">
                                 <div class="card bg-danger text-light">
-                                  <div class="card-body text-center" style="font-size:40px">
-                                    <p style="font-size:18px">MISSED</p>
+                                  <div class="card-body text-center" style="font-size:30px">
+                                    <p style="font-size:14px">MISSED</p>
                                     {{ lastAttendance[i].countMiss }}
                                   </div>
                                 </div>
@@ -143,130 +141,27 @@
                         </div>
                       </div>
                     </div>
-
                   </div>
-
-                </div>
-              </div>
-            </div>
-
-
-
-          </div>
-
-
-          <div style="padding: 10px"></div>
-
-
-          <div class="row" *ngIf="chartData[i].length !== 0">
-            <div class="col">
-              <div class="card">
-                <div class="card-body">
-                  <h5 class="card-title">CHART</h5>
-                  <canvas baseChart [colors]="chartColors" [datasets]="chartData[i]" [labels]="chartLabels[i]" [options]="barChartOptions"
-                    [legend]="barChartLegend" [chartType]="barChartType" (chartHover)="chartHovered($event)" (chartClick)="chartClicked($event)">
-                  </canvas>
+                  <div style="padding: 10px"></div>
+                  <div class="row" *ngIf="chartData[i].length !== 0">
+                    <div class="col">
+                      <div class="card">
+                        <div class="card-body">
+                          <h5 class="card-title">CHART</h5>
+                          <canvas baseChart [colors]="chartColors" [datasets]="chartData[i]" [labels]="chartLabels[i]" [options]="barChartOptions"
+                            [legend]="barChartLegend" [chartType]="barChartType" (chartHover)="chartHovered($event)" (chartClick)="chartClicked($event)">
+                          </canvas>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-
-
-
-
-
-
-
       </div>
       <div style="padding: 10px"></div>
     </div>
-    <!--div class="card">
-          <div class="card-header">
-            <div class="row">
-              <div class="col-8 text-left"><b>
-                  <p style="display:inline; font-size: 20px">{{ i+1 }}&nbsp;
-                    <i class="fa fa-angle-right" aria-hidden="true"></i>&nbsp;
-                  </p>
-                  <p style="display:inline; font-size: 20px">{{ course.id }} | {{ course.name }}</p></b>
-              </div>
-              <div class="col-4 text-right">
-                <button type="button" class="btn btn-warning" (click)="test(course.students)">
-                  <i class="fa fa-arrow-right" aria-hidden="true"></i>&nbsp; คลิกเข้าสู่รายวิชา
-                </button>
-              </div>
-            </div>
-          </div>
-          <div class="card-body">
-            <div class="row">
-              <div class="col-4">
-                <p>
-                  <i class="fa fa-calendar-check-o" aria-hidden="true"></i>&nbsp; ปีการศึกษา : {{course.trimester}}/{{course.year}}
-                </p>
-                <p *ngIf="!isEmptyObject(course.students)">
-                  <i class="fa fa-users" aria-hidden="true"></i>&nbsp; จำนวนนักศึกษา : {{ objectKeys(course.students).length
-                  }}
-                </p>
-                <p *ngIf="isEmptyObject(course.students)" class="text-danger" style="font-size:14px">
-                  <i class="fa fa-users" aria-hidden="true"></i>&nbsp; ยังไม่มีการเพิ่มรายชื่อนักศึกษา
-                </p>
-              </div>
-              <div class="col-8">
-                <ul class="list-group">
-                  <li class="list-group-item d-flex justify-content-between align-items-center">
-                    FEEDBACK
-                  </li>
-                  <li class="list-group-item d-flex justify-content-between align-items-center">
-                    {{ ( feedbackListObservable | async ) }}
-                  </li>
-                  <a href="#" class="btn btn-default btn-block">View All Feedbacks</a>
-                </ul>
-              </div>
-            </div>
-            <div *ngIf="!isEmptyObject(course.Feedback)">
-              <div class="card">
-                <div class="card-header">
-                  FEEDBACK COMMENT
-                </div>
-                <div class="card-body">
-                  <div class="row">
-                    <div class="col-md-6">
-                      <ul class="list-group">
-                        <li *ngFor="let comment of fbLast.comment" class="list-group-item d-flex justify-content-between align-items-center">
-                          {{ comment }}
-                        </li>
-                        <a href="#" class="btn btn-default btn-block">View All Feedbacks</a>
-                      </ul>
-                    </div>
-                    <div class="col-md-6">
-                      <canvas baseChart height="150px" [data]="pieChartData" [labels]="pieChartLabels" [chartType]="pieChartType" (chartHover)="chartHovered($event)"
-                        (chartClick)="chartClicked($event)" [colors]="pieChartColors">
-                      </canvas>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div-->
   </div>
 </div>
-
-
-
-
-
-<!--div *ngIf="isEmptyObject(course.schedule)" class="text-danger" style="font-size:14px">
-          <i class="fa fa-users" aria-hidden="true"></i>&nbsp; ยังไม่มีข้อมูล Attendance
-        </div>
-        <div *ngIf="!isEmptyObject(course.schedule)"  class="card mb-3">
-          <div class="card-header">
-            Attendance Chart
-          </div>
-          <div class="card-body">
-            <canvas baseChart [colors]="chartColors" [datasets]="chartData[i]" [labels]="chartLabels[i]" [options]="barChartOptions" [legend]="barChartLegend"
-              [chartType]="barChartType" (chartHover)="chartHovered($event)" (chartClick)="chartClicked($event)">
-            </canvas>
-          </div>
-        </div>
-      </div-->
