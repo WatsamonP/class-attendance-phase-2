@@ -180,6 +180,16 @@ export class AddCourseComponent implements OnInit {
       name: 'All Group',
     });
 
+    this.afDb.object(`users/${this.authUid}/course/${val.id}/gradeList`).update({
+      A: 80,
+      Bp:75,
+      B: 70,
+      Cp: 65,
+      C: 60,
+      Dp: 55,
+      D: 50
+    });
+
   }
 
   public onClickEvent(event) {

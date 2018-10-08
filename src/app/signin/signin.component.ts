@@ -59,4 +59,13 @@ export class SigninComponent implements OnInit {
     this.router.navigate(['/signup']);
   }
 
+  forgotPassword(){
+    console.log(this.form.value.email);
+    if(this.form.value.email == undefined || this.form.value.email == '' || this.form.value.email == null ){
+      this.toastr.warning("กรุณากรอก Email");
+    }else{
+      this.authService.resetPassword(this.form.value.email);    
+    }
+  }
+
 }

@@ -18,7 +18,7 @@ import { AuthService } from '../../../../shared/services/auth.service'
 })
 export class ScoreComponent implements OnInit {
 
-  objectKeys = Object.keys;  
+  objectKeys = Object.keys;
   authUid: String;
   courseParam: String;
   groupParam: String;
@@ -40,6 +40,10 @@ export class ScoreComponent implements OnInit {
   totalPercent: any;
   studentGrade: any;
   isShowStudentsName: boolean = false;
+  gradeList: any;
+  closeResult: string;
+  gradeObject: any;
+
 
   constructor(
     private afDb: AngularFireDatabase,
@@ -81,13 +85,23 @@ export class ScoreComponent implements OnInit {
       this.studentList = [];
       this.scheduleList = [];
       this.scoreList = [];
+      this.gradeList = [];
       afDb.list(`users/${this.authUid}/course/${cId}/schedule`).snapshotChanges().map(actions => {
         return actions.map(action => ({ key: action.key, ...action.payload.val() }));
       }).subscribe(items => {
         this.scheduleList = items;
+
         if (this.scheduleList.length == 0) {
           this.isNotShowData = false;
         } else {
+          // grade
+          this.gradeObject = afDb.object(`users/${this.authUid}/course/${cId}/gradeList`).valueChanges();
+
+          afDb.object(`users/${this.authUid}/course/${cId}/gradeList`).valueChanges().subscribe(res => {
+            let temp: any = res;
+            this.gradeList = [temp.A, temp.Bp, temp.B, temp.Cp, temp.C, temp.Dp, temp.D]
+          })
+
           afDb.list(`users/${this.authUid}/course/${cId}/students`).snapshotChanges().map(actions => {
             return actions.map(action => ({ key: action.key, ...action.payload.val() }));
           }).subscribe(stds => {
@@ -140,60 +154,72 @@ export class ScoreComponent implements OnInit {
     })
   }
 
-  calTotalPercent(){
+  calTotalPercent() {
     let total = 0
-    for(var i=0; i<this.dynamicEvent.length; i++){
+    for (var i = 0; i < this.dynamicEvent.length; i++) {
       total = total + this.dynamicEvent[i].percent;
     }
     this.configTotalPercent = total;
   }
 
-  calStudentPetcent(){
+  calStudentPetcent() {
     this.totalPercent = [];
     this.studentGrade = []
     let total = 0
-    for(var i=0; i<this.studentList.length; i++){
+    for (var i = 0; i < this.studentList.length; i++) {
       total = 0
-      for(var j=0; j<this.dynamicEvent.length; j++){
+      for (var j = 0; j < this.dynamicEvent.length; j++) {
         let temp = this.dynamicEvent[j].id
-        if(this.studentList[i].score[temp] !== undefined){
-          total = total + this.studentList[i].score[temp] 
+        if (this.studentList[i].score[temp] !== undefined) {
+          total = total + this.studentList[i].score[temp]
         }
       }
       let grade = this.calGrade(total)
       this.totalPercent.push(total)
       this.studentGrade.push(grade)
-    } 
+    }
   }
 
-  calGrade(score){
+  calGrade(score) {
     let grade: String = '';
-    if(score >= 80){
+    if (score >= Number(this.gradeList[0])) {
       grade = 'A'
-    }else if(score >= 75){
+    } else if (score >= Number(this.gradeList[1])) {
       grade = 'B+'
-    }else if(score >= 70){
+    } else if (score >= Number(this.gradeList[2])) {
       grade = 'B'
-    }else if(score >= 65){
+    } else if (score >= Number(this.gradeList[3])) {
       grade = 'C+'
-    }else if(score >= 60){
+    } else if (score >= Number(this.gradeList[4])) {
       grade = 'C'
-    }else if(score >= 55){
+    } else if (score >= Number(this.gradeList[5])) {
       grade = 'D+'
-    }else if(score >= 50){
+    } else if (score >= Number(this.gradeList[6])) {
       grade = 'D'
-    }else{
+    } else {
       grade = 'F'
     }
 
     return grade;
   }
 
-  public configGrade(content) {
-    //this.modalService.open(content, { centered: true });
+  openVerticallyCentered(content) {
+    this.modalService.open(content, { centered: true });
   }
 
-  public sendMessageToStudentsName(){
+  updateConfigGrade() {
+    this.afDb.object(`users/${this.authUid}/course/${this.courseParam}/gradeList`).update({
+      A: this.gradeList[0],
+      Bp:this.gradeList[1],
+      B: this.gradeList[2],
+      Cp: this.gradeList[3],
+      C: this.gradeList[4],
+      Dp: this.gradeList[5],
+      D: this.gradeList[6]
+    });
+  }
+
+  public sendMessageToStudentsName() {
     this.isShowStudentsName = !this.isShowStudentsName;
   }
 
