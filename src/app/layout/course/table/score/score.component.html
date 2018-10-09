@@ -22,8 +22,8 @@
     </div>
   </div>
   <div class="col text-right">
-      <p class="text-muted" style="font-size:12px">แสดงรายชื่อนักศึกษา</p>
-      <ui-switch [(ngModel)]="isShowStudentsName" color="#FF8800" switchColor="#FF8800" (change)="sendMessageToStudentsName()"></ui-switch>
+    <p class="text-muted" style="font-size:12px">แสดงรายชื่อนักศึกษา</p>
+    <ui-switch [(ngModel)]="isShowStudentsName" color="#FF8800" switchColor="#FF8800" (change)="sendMessageToStudentsName()"></ui-switch>
   </div>
 </div>
 
@@ -47,7 +47,7 @@
         </button>
       </th>
       <th style="width:80px; text-align: center">
-        <button class="btn btn-light" (click)="configGrade(configGrade)">
+        <button class="btn btn-light" (click)="openVerticallyCentered(configGrade)">
           <b>Grade</b>
         </button>
       </th>
@@ -86,6 +86,83 @@
 </table>
 
 
-<ng-template #configGrade let-c="close" let-d="dismiss">
-  แก้ไข Grading Scheme
+<ng-template #configGrade let-d="dismiss">
+  <div class="modal-header">
+    <h4 class="modal-title">Grading</h4>
+    <button type="button" class="close" aria-label="Close" (click)="d('Close click')">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+
+
+    <div class="input-group" style="padding:10px">
+      <div class="input-group-prepend">
+        <span class="input-group-text bg-success text-light" style="width:50px" id=""><b style="font-size: 110%">A</b></span>
+      </div>
+      <input type="text" class="form-control text-center" [(ngModel)]="gradeList[0]">
+      <input type="text" class="form-control text-center" placeholder="100" disabled>
+    </div>
+
+
+    <div class="input-group" style="padding:10px;">
+      <div class="input-group-prepend">
+        <span class="input-group-text bg-success text-light" style="width:50px" id=""><b style="font-size: 110%">B+</b></span>
+      </div>
+      <input type="text" class="form-control text-center" [(ngModel)]="gradeList[1]">
+      <input type="text" class="form-control text-center" placeholder="{{ gradeList[0]-1 }}" disabled>
+    </div>
+
+    <div class="input-group" style="padding:10px;">
+      <div class="input-group-prepend">
+        <span class="input-group-text bg-success text-light" style="width:50px" id=""><b style="font-size: 110%">B</b></span>
+      </div>
+      <input type="text" class="form-control text-center" [(ngModel)]="gradeList[2]">
+      <input type="text" class="form-control text-center" placeholder="{{ gradeList[1]-1 }}" disabled>
+    </div>
+
+    <div class="input-group" style="padding:10px;">
+      <div class="input-group-prepend">
+        <span class="input-group-text bg-warning" style="width:50px" id=""><b style="font-size: 110%">C+</b></span>
+      </div>
+      <input type="text" class="form-control text-center" [(ngModel)]="gradeList[3]">
+      <input type="text" class="form-control text-center" placeholder="{{ gradeList[2]-1 }}" disabled>
+    </div>
+
+    <div class="input-group" style="padding:10px;">
+      <div class="input-group-prepend">
+        <span class="input-group-text bg-warning" style="width:50px" id=""><b style="font-size: 110%">C</b></span>
+      </div>
+      <input type="text" class="form-control text-center" [(ngModel)]="gradeList[4]">
+      <input type="text" class="form-control text-center" placeholder="{{ gradeList[3]-1 }}" disabled>
+    </div>
+
+    <div class="input-group" style="padding:10px;">
+      <div class="input-group-prepend">
+        <span class="input-group-text bg-warning" style="width:50px" id=""><b style="font-size: 110%">D+</b></span>
+      </div>
+      <input type="text" class="form-control text-center" [(ngModel)]="gradeList[5]">
+      <input type="text" class="form-control text-center" placeholder="{{ gradeList[4]-1 }}" disabled>
+    </div>
+
+    <div class="input-group" style="padding:10px;">
+      <div class="input-group-prepend">
+        <span class="input-group-text bg-danger text-light" style="width:50px" id=""><b style="font-size: 110%">D</b></span>
+      </div>
+      <input type="text" class="form-control text-center" [(ngModel)]="gradeList[6]">
+      <input type="text" class="form-control text-center" placeholder="{{ gradeList[5]-1 }}" disabled>
+    </div>
+
+    <div class="input-group" style="padding:10px;">
+      <div class="input-group-prepend">
+        <span class="input-group-text bg-danger text-light" style="width:50px" id=""><b style="font-size: 110%">F</b></span>
+      </div>
+      <input type="text" class="form-control text-center" placeholder="0" disabled>
+      <input type="text" class="form-control text-center" placeholder="{{ gradeList[6]-1 }}" disabled>
+    </div>
+
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-primary" (click)="updateConfigGrade()">บันทึกการตั้งค่า</button>
+  </div>
 </ng-template>
