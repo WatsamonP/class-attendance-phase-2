@@ -40,6 +40,7 @@ export class ExcelService {
   groupName: String;
   scheduleList: any;
   scheduleKeyList: any;
+  percentList: any;
 
 
   constructor() { }
@@ -51,6 +52,7 @@ export class ExcelService {
 
     this.courseDetail = json[0];
     this.groupParam = json[4];
+    this.percentList = json[5];
     console.log(json)
     if(this.groupParam == 'all'){
       this.groupName = 'AllGroup';
@@ -81,18 +83,11 @@ export class ExcelService {
 
       if (this.sheetName[i] == 'Score') {
         let res = this.fetchScore();
-        excelList.push(res);
-      } else if(this.scheduleList[i] == undefined){
-        let res = this.nullValue();
-        excelList.push(res);
-      }else {
-        resFetchOtherEvent[i] = this.fetchOtherEvent(this.scheduleList[i], this.scheduleKeyList[i]);
-
         for (var s = 0; s < this.students.length; s++) {
           studentCollect = {};
           let collect = {}
-          for (var j = 0; j < resFetchOtherEvent[i].length; j++) {
-            collect = Object.assign(collect, resFetchOtherEvent[i][j][s])
+          for (var j = 0; j < res.length; j++) {
+            collect = Object.assign(collect, res[j][s])
 
           }
           studentCollect = collect
@@ -104,8 +99,39 @@ export class ExcelService {
             excelList.push(collectList);
             collectList = [];
           }
-
         }
+
+      }else {
+        let isNull = true;
+        for (var k = 0; k < this.scheduleList.length; k++){
+            if (this.percentList[i].event == this.scheduleList[k].key){
+              isNull = false;
+              resFetchOtherEvent[i] = this.fetchOtherEvent(this.scheduleList[k], this.scheduleKeyList[k]);
+
+              for (var s = 0; s < this.students.length; s++) {
+                studentCollect = {};
+                let collect = {}
+                for (var j = 0; j < resFetchOtherEvent[i].length; j++) {
+                  collect = Object.assign(collect, resFetchOtherEvent[i][j][s])
+
+                }
+                studentCollect = collect
+                if (studentCollect !== undefined) {
+                  collectList.push(studentCollect)
+                }
+
+                if (s == (this.students.length - 1)) {
+                  excelList.push(collectList);
+                  collectList = [];
+                }
+              }
+            }
+        }
+        if (isNull){
+          let res = this.nullValue();
+          excelList.push(res);
+        }
+
       }
 
 
@@ -118,9 +144,10 @@ export class ExcelService {
 
   fetchOtherEvent(scheduleList, scheduleKey) {
     let list = [];
+    //let key = Object.keys(this.percentList);
     let key = Object.keys(scheduleList);
     let sKey = Object.keys(this.students);
-    list = [];
+
     for (var i = 0; i < key.length; i++) {
       let date = moment(scheduleList[key[i]].date).format('DD/MM/YYYY');
       let formatedDate = date + '[' + Number(i) + ']';
@@ -156,13 +183,63 @@ export class ExcelService {
 
   fetchScore() {
     let list = [];
-    for (var s = 0; s < this.students.length; s++) {
-      let studentOb = {
-        'รหัสนักศึกษา': this.students[s].id,
-        'ชื่อ-นามสกุล': this.students[s].name,
-        'กลุ่มเรียน': this.students[s].group,
-      };
-      list.push(studentOb)
+    let key = Object.keys(this.percentList);
+    let sKey = Object.keys(this.students);
+    let totalScore = [];
+    for (var i = 0; i < key.length; i++) {
+      let Column = this.percentList[key[i]].event + '[ ' + this.percentList[key[i]].percent + '% ]';
+      let eventId = this.percentList[key[i]].event;
+      let student = [];
+      let studentScore;  // studen
+      for (var s = 0; s < sKey.length; s++) {
+        if (i == 0){
+          totalScore[s] = 0;
+        }
+        if (this.percentList[key[i]].event == "total"){
+          studentScore = { [Column]: totalScore[s] }
+          let studentOb = {
+            'รหัสนักศึกษา': this.students[sKey[s]].id,
+            'ชื่อ-นามสกุล': this.students[sKey[s]].name,
+            'กลุ่มเรียน': this.students[sKey[s]].group,
+          };
+          if (studentOb !== undefined) {
+            let ob = Object.assign(studentOb, studentScore)
+            student.push(ob)
+          }
+        }else if (this.students[sKey[s]].score[eventId] !== undefined) {
+          //console.log(this.students[sKey[s]].score[eventId])
+          let score = this.students[sKey[s]].score[eventId];
+          studentScore = { [Column]: score }
+          totalScore[s] += score;
+          let studentOb = {
+            'รหัสนักศึกษา': this.students[sKey[s]].id,
+            'ชื่อ-นามสกุล': this.students[sKey[s]].name,
+            'กลุ่มเรียน': this.students[sKey[s]].group,
+          };
+          if (studentOb !== undefined) {
+            let ob = Object.assign(studentOb, studentScore)
+            //console.log(ob)
+            student.push(ob)
+          }
+        }else{
+          studentScore = { [Column]: 0 }
+
+          let studentOb = {
+            'รหัสนักศึกษา': this.students[sKey[s]].id,
+            'ชื่อ-นามสกุล': this.students[sKey[s]].name,
+            'กลุ่มเรียน': this.students[sKey[s]].group,
+          };
+          if (studentOb !== undefined) {
+            let ob = Object.assign(studentOb, studentScore)
+            student.push(ob)
+          }
+        }
+      }
+      //console.log(student)
+      if (studentScore !== undefined) {
+        //list.push(studentSchedule)
+        list.push(student)
+      }
     }
     return list;
   }
@@ -196,13 +273,11 @@ export class ExcelService {
     //export_523211-DATABASE SYSTEMS-Groupall_[30-8-2018]
     FileSaver.saveAs(data,
       'export_'
-      + this.courseDetail.id + '-' 
-      + this.courseDetail.name + '_' 
+      + this.courseDetail.id + '-'
+      + this.courseDetail.name + '_'
       + this.groupName
       +'__' + new Date().getDate() + '-' + (new Date().getMonth()+1) + '-'+new Date().getFullYear()
       + EXCEL_EXTENSION);
     console.log('สำเร็จ')
   }
 }
-
-
