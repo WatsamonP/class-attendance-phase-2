@@ -602,7 +602,7 @@ export class EventComponent implements OnInit {
   openConfirmDeleteStudentAlert(content, student) {
     console.log(student)
     this.studentDeleteMessage = String(student.id + ' : ' + student.name);
-    this.modalService.open(content, { size: 'sm' }).result.then((result) => {
+    this.modalService.open(content).result.then((result) => {
       this.toastr.success(
         student.id + ' : ' + student.name, 'ลบ'
       );

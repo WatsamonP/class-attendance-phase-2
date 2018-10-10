@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, ViewEncapsulation, ViewChild } from '@angular/core';
+import { Component, OnInit, Input, ViewEncapsulation, ViewChild, TemplateRef } from '@angular/core';
 import { EventComponent } from './table/event/event.component'
 import { Router, ParamMap, ActivatedRoute, } from '@angular/router';
 import { Observable } from 'rxjs';
@@ -241,8 +241,9 @@ export class CourseComponent implements OnInit {
       this.afDb.object(`users/${this.authUid}/course/${this.courseParam}`).update(obj)
     }
 
-    this.toastr.success('กรุณารอ Reload สักครู่', 'บันทึกการตั้งค่าสำเร็จ');
-    setTimeout(() => { location.reload() }, 3000);
+    this.toastr.success('', 'บันทึกการตั้งค่าสำเร็จ');
+    //this.toastr.success('กรุณารอ Reload สักครู่', 'บันทึกการตั้งค่าสำเร็จ');
+    //setTimeout(() => { location.reload() }, 3000);
   }
 
 
@@ -575,7 +576,6 @@ export class CourseComponent implements OnInit {
 
 
 
-
   // XXXXXXX  XXXXXXX  XXXXXXX  XX    XX    XX       XX  XXXXXXX  XXXXX    XXXXXXX  XX
   // XX   XX  XX   XX  XX       XXX   XX    XXX     XXX  XX   XX  XX   XX  XX   XX  XX
   // XX   XX  XXXXXXX  XXXXXXX  XX X  XX    XX X   X XX  XX   XX  XX   XX  XXXXXXX  XX
@@ -594,7 +594,6 @@ export class CourseComponent implements OnInit {
   }
 
   public openEvent(content) {
-    //this.modalService.open(content);
     this.modalService.open(content, { centered: true });
   }
 

@@ -3,7 +3,7 @@
   <hr>
   <div *ngFor="let course of courseList; let i = index">
     <div style="padding:2px">
-      <div class="container">
+      <div>
 
         <button *ngIf="!expandList[i].expanded" (click)="expandedCourseDashboard(i)" type="button" class="btn {{ buttonOutlineStyle[i] }} btn-lg btn-block">
           <div class="row">
@@ -40,35 +40,36 @@
                 </div>
                 <div class="card-header text-right {{ classColor[i] }} " style="font-size:20px" *ngIf="lastAttendance[i].date !== undefined">
                   <i class="fa fa-clock-o " aria-hidden="true"></i>
-                  {{ lastAttendance[i].date | date: 'mediumDate' }} &nbsp;&nbsp;&nbsp; {{ lastAttendance[i].date | date: 'mediumTime' }}
+                  {{ lastAttendance[i].date | date: 'mediumDate' }} &nbsp;&nbsp;&nbsp; {{ lastAttendance[i].date |
+                  date: 'mediumTime' }}
                 </div>
                 <!-- END HEADER -->
                 <!-- BODY -->
                 <div class="card-body">
-                  <div *ngIf="feedbackLastList[i].rating == 0" class="text-danger text-center">
-                    Not found Feedback <b>Feeling</b><br><br>
+                  <div *ngIf="feedbackLastList[i].feeling == 0" class="text-danger text-center">
+                    Not found <b>Feedback</b><br><br>
                   </div>
-                  <div class="wrapper" *ngIf="feedbackLastList[i].rating !== 0">
+                  <div class="wrapper" *ngIf="feedbackLastList[i].feeling !== 0">
                     <table class="table">
                       <thead>
                         <tr class="text-center">
                           <th scope="col">
-                            <img [src]="emojiPathPng('crazy-text')" width='25px'>
+                            <img [src]="emojiPathPng('crazy-text2')" width='25px'>
                           </th>
                           <th scope="col">
-                            <img [src]="emojiPathPng('cry-text')" width='25px'>
+                            <img [src]="emojiPathPng('cry-text2')" width='25px'>
                           </th>
                           <th scope="col">
                             <img [src]="emojiPathPng('dead-text')" width='25px'>
                           </th>
                           <th scope="col">
-                            <img [src]="emojiPathPng('cry-smile-text')" width='25px'>
+                            <img [src]="emojiPathPng('cry-smile-text2')" width='25px'>
                           </th>
                           <th scope="col">
-                            <img [src]="emojiPathPng('smile-text')" width='25px'>
+                            <img [src]="emojiPathPng('smile-text2')" width='25px'>
                           </th>
                           <th scope="col">
-                            <img [src]="emojiPathPng('love-text')" width='25px'>
+                            <img [src]="emojiPathPng('love-text2')" width='25px'>
                           </th>
                           <th scope="col">
                             <img [src]="emojiPathPng('bored-text')" width='25px'>
@@ -80,14 +81,14 @@
                       </thead>
                       <tbody>
                         <tr class="text-center">
-                          <td scope="row">{{feedbackLastList[i].rating.count0}}</td>
-                          <td>{{feedbackLastList[i].rating.count1}}</td>
-                          <td>{{feedbackLastList[i].rating.count2}}</td>
-                          <td>{{feedbackLastList[i].rating.count3}}</td>
-                          <td>{{feedbackLastList[i].rating.count4}}</td>
-                          <td>{{feedbackLastList[i].rating.count5}}</td>
-                          <td>{{feedbackLastList[i].rating.count6}}</td>
-                          <td>{{feedbackLastList[i].rating.count7}}</td>
+                          <td scope="row">{{feedbackLastList[i].feeling.count0}}</td>
+                          <td>{{feedbackLastList[i].feeling.count1}}</td>
+                          <td>{{feedbackLastList[i].feeling.count2}}</td>
+                          <td>{{feedbackLastList[i].feeling.count3}}</td>
+                          <td>{{feedbackLastList[i].feeling.count4}}</td>
+                          <td>{{feedbackLastList[i].feeling.count5}}</td>
+                          <td>{{feedbackLastList[i].feeling.count6}}</td>
+                          <td>{{feedbackLastList[i].feeling.count7}}</td>
                         </tr>
                       </tbody>
                     </table>
@@ -96,16 +97,11 @@
 
                   <div class="row">
                     <div class="col-8">
-                      <div class="card">
+                      <div class="card" *ngIf="feedbackLastList[i].comment.length !== 0">
                         <div class="card-body">
-                          <div *ngIf="feedbackLastList[i].comment.length == 0" class="text-danger text-center">
-                            Not found Feedback <b>Comment</b>
-                          </div>
-                          <div *ngIf="feedbackLastList[i].comment.length !== 0">
-                            <h5 class="card-title">FEEDBACK</h5>
-                            <div *ngFor="let comment of feedbackLastList[i].comment; let c = index">
-                              <li>{{comment}}</li>
-                            </div>
+                          <h5 class="card-title">FEEDBACK</h5>
+                          <div *ngFor="let comment of feedbackLastList[i].comment; let c = index">
+                            <li>{{comment}}</li>
                           </div>
                         </div>
                       </div>
@@ -148,8 +144,9 @@
                       <div class="card">
                         <div class="card-body">
                           <h5 class="card-title">CHART</h5>
-                          <canvas baseChart [colors]="chartColors" [datasets]="chartData[i]" [labels]="chartLabels[i]" [options]="barChartOptions"
-                            [legend]="barChartLegend" [chartType]="barChartType" (chartHover)="chartHovered($event)" (chartClick)="chartClicked($event)">
+                          <canvas baseChart [colors]="chartColors" [datasets]="chartData[i]" [labels]="chartLabels[i]"
+                            [options]="barChartOptions" [legend]="barChartLegend" [chartType]="barChartType"
+                            (chartHover)="chartHovered($event)" (chartClick)="chartClicked($event)">
                           </canvas>
                         </div>
                       </div>

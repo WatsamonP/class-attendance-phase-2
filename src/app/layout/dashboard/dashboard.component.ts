@@ -81,56 +81,62 @@ export class DashboardComponent implements OnInit {
       this.courseList = items;
       let object = {}
       let commentList = []
-      let ratingObject = {}
-      let count0 = 0, count1 = 0, count2 = 0, count3 = 0, count4 = 0, count5 = 0, count6 = 0, count7
+      let feelingObject = {}
+      let count0 = 0, count1 = 0, count2 = 0, count3 = 0, count4 = 0, count5 = 0, count6 = 0, count7 = 0;
+
       for (var i = 0; i < this.courseList.length; i++) {
         this.expandList.push({ expanded: false })
         object = {}
-        ratingObject = {}
+        feelingObject = {}
         commentList = []
         count0 = 0; count1 = 0; count2 = 0; count3 = 0; count4 = 0; count5 = 0; count6 = 0; count7 = 0;
-        if (this.courseList[i].Feedback !== undefined) {
-          let fbKey = Object.keys(this.courseList[i].Feedback)
-          //for(var j=0; j<fbKey.length; j++){
-          let commentOb = Object.keys(this.courseList[i].Feedback[fbKey[fbKey.length - 1]].comment)
-          let ratingOb = Object.keys(this.courseList[i].Feedback[fbKey[fbKey.length - 1]].rating)
-          let comment;
-          let rating;
 
-          for (var k = 0; k < commentOb.length; k++) {
-            comment = this.courseList[i].Feedback[fbKey[fbKey.length - 1]].comment[commentOb[k]];
-            commentList.push(comment)
-          }
-          for (var k = 0; k < ratingOb.length; k++) {
-            rating = this.courseList[i].Feedback[fbKey[fbKey.length - 1]].rating[ratingOb[k]];
-            if (rating == 0) {
-              count0++;
-            } else if (rating == 1) {
-              count1++;
-            } else if (rating == 2) {
-              count2++;
-            } else if (rating == 3) {
-              count3++;
-            } else if (rating == 4) {
-              count4++;
-            } else if (rating == 5) {
-              count5++;
-            } else if (rating == 6) {
-              count6++;
-            } else if (rating == 7) {
-              count7++;
-            } else {
-              console.log('ERROR')
+        let lastAttKey;
+        if (this.courseList[i].schedule !== undefined && this.courseList[i].schedule.attendance !== undefined) {
+          let attKey = Object.keys(this.courseList[i].schedule.attendance)
+          lastAttKey = attKey[attKey.length - 1];
+        }
+
+        if (this.courseList[i].Feedback !== undefined) {
+          let fbKey = Object.keys(this.courseList[i].Feedback)  // dateId
+          if (this.courseList[i].Feedback[lastAttKey] == undefined) {
+            console.log('undefined')
+            object = { comment: [], feeling: 0 }
+          } else {
+            // fount
+            let studentsObject = Object.keys(this.courseList[i].Feedback[lastAttKey]) // ได้ Object ของแต่ละคอมคน
+            for (var s = 0; s < studentsObject.length; s++) {
+              let comment = this.courseList[i].Feedback[lastAttKey][studentsObject[s]].comment;
+              commentList.push(comment);
+              let feel = this.courseList[i].Feedback[lastAttKey][studentsObject[s]].feeling;
+              if (feel == 'อยากจะบ้า') {
+                count0++;
+              } else if (feel == 'อยากร้องไห้') {
+                count1++;
+              } else if (feel == 'ไม่โอเค') {
+                count2++;
+              } else if (feel == 'ยังไหว') {
+                count3++;
+              } else if (feel == 'สนุก') {
+                count4++;
+              } else if (feel == 'สนุกมาก') {
+                count5++;
+              } else if (feel == 'น่าเบื่อ') {
+                count6++;
+              } else if (feel == 'ง่วง') {
+                count7++;
+              } else {
+                console.log('ERROR')
+              }
+              feelingObject = {
+                count0: count0, count1: count1, count2: count2, count3: count3,
+                count4: count4, count5: count5, count6: count6, count7: count7,
+              }
+              object = { comment: commentList, feeling: feelingObject }
             }
           }
-          ratingObject = {
-            count0: count0, count1: count1, count2: count2, count3: count3,
-            count4: count4, count5: count5, count6: count6, count7: count7,
-          }
-          object = { comment: commentList, rating: ratingObject }
-          //}
         } else {
-          object = { comment: [], rating: 0 }
+          object = { comment: [], feeling: 0 }
         }
         this.feedbackLastList.push(object)
         console.log(this.feedbackLastList)
@@ -138,19 +144,9 @@ export class DashboardComponent implements OnInit {
       this.getBarChartData();
       this.getFeelingChart();
       this.getLastAttendance();
-      //this.getAttendanceConfig(authUid);
       console.log(this.courseList)
       return items.map(item => item.key);
 
-      //this.emojiList = this.reactionSvc.emojiList;
-      /*
-            this.subscription = this.reactionSvc.getReactions(this.itemId)
-              .valueChanges()
-              .subscribe(reactions => {
-                //this.reactionCount = this.reactionSvc.countReactions(reactions)
-                //this.userReaction = this.reactionSvc.userReaction(reactions)
-              })
-              */
     });
 
     this.feedbackListObservable = afDb.object(`Feedbacktest`).valueChanges();
@@ -213,9 +209,6 @@ export class DashboardComponent implements OnInit {
         })
       lasAttendance.push(temp)
     }
-
-
-    console.log(lasAttendance)
   }
 
 
@@ -233,17 +226,37 @@ export class DashboardComponent implements OnInit {
         }
       }
     }
-
-
-
-
-
-
-
-
-    //this.isSelectCourse = !this.isSelectCourse;
   }
 
+
+  getLastAttendance() {
+    this.lastAttendance = [];
+    let temp = {};
+    let lastAtt;
+    for (var i = 0; i < this.courseList.length; i++) {
+      temp = {};
+      if (this.courseList[i].schedule == undefined || this.courseList[i].schedule.attendance == undefined) {
+        temp = {
+          countMiss: 0,
+          countLate: 0,
+          countOnTime: 0,
+          countLeave: 0
+        }
+      } else {
+        let attKey = Object.keys(this.courseList[i].schedule.attendance)
+        lastAtt = attKey;
+        temp = {
+          countMiss: this.courseList[i].schedule.attendance[attKey[attKey.length - 1]].countMiss,
+          countLate: this.courseList[i].schedule.attendance[attKey[attKey.length - 1]].countLate,
+          countOnTime: this.courseList[i].schedule.attendance[attKey[attKey.length - 1]].countOnTime,
+          countLeave: this.courseList[i].schedule.attendance[attKey[attKey.length - 1]].countLeave,
+          date: this.courseList[i].schedule.attendance[attKey[attKey.length - 1]].date,
+        }
+      }
+      this.lastAttendance.push(temp)
+    }
+    console.log(this.lastAttendance)
+  }
 
 
 
@@ -284,61 +297,40 @@ export class DashboardComponent implements OnInit {
   }
 
 
-  getFeedback(course_id, attendancekey) {
-    let tempStudent;
-    //this.setDefault();
-    this._dataService.getStudent().subscribe(resStd => {
-      //let ob = {}
-      tempStudent = Object.keys(resStd);
-      this.setDefault();
-      for (var i = 0; i < tempStudent.length; i++) {
-        this._dataService.getFeedback(tempStudent[i], course_id)
-          .subscribe((resFeedback) => {
-            if (resFeedback.feedback !== null) {
-              if (resFeedback.feedback[attendancekey[attendancekey.length - 1]] !== undefined) {
-                //console.log(resFeedback.feedback[attendancekey[attendancekey.length-1]])
-                let index = resFeedback.feedback[attendancekey[attendancekey.length - 1]].rating;
-                this.lastAttendance[index].count = Number(this.lastAttendance[index].count) + 1;
-                this.lastAttendance[8].feeling = course_id;
-              }
-            } else {
-              //this.lastAttendance[8].feeling = course_id;
-            }
-          })
-      }
-      console.log(this.lastAttendance)
-      //let list = []
-      //list.push(ob)
-      //console.log(list)
-    })
-  }
 
-  getLastAttendance() {
-    this.lastAttendance = [];
-    let temp = {};
-    for (var i = 0; i < this.courseList.length; i++) {
-      temp = {};
-      if (this.courseList[i].schedule == undefined || this.courseList[i].schedule.attendance == undefined) {
-        temp = {
-          countMiss: 0,
-          countLate: 0,
-          countOnTime: 0,
-          countLeave: 0
+
+
+  /*
+    getFeedback(course_id, attendancekey) {
+      let tempStudent;
+      //this.setDefault();
+      this._dataService.getStudent().subscribe(resStd => {
+        //let ob = {}
+        tempStudent = Object.keys(resStd);
+        this.setDefault();
+        for (var i = 0; i < tempStudent.length; i++) {
+          this._dataService.getFeedback(tempStudent[i], course_id)
+            .subscribe((resFeedback) => {
+              if (resFeedback.feedback !== null) {
+                if (resFeedback.feedback[attendancekey[attendancekey.length - 1]] !== undefined) {
+                  //console.log(resFeedback.feedback[attendancekey[attendancekey.length-1]])
+                  let index = resFeedback.feedback[attendancekey[attendancekey.length - 1]].rating;
+                  this.lastAttendance[index].count = Number(this.lastAttendance[index].count) + 1;
+                  this.lastAttendance[8].feeling = course_id;
+                }
+              } else {
+                //this.lastAttendance[8].feeling = course_id;
+              }
+            })
         }
-      } else {
-        let attKey = Object.keys(this.courseList[i].schedule.attendance)
-        temp = {
-          countMiss: this.courseList[i].schedule.attendance[attKey[attKey.length - 1]].countMiss,
-          countLate: this.courseList[i].schedule.attendance[attKey[attKey.length - 1]].countLate,
-          countOnTime: this.courseList[i].schedule.attendance[attKey[attKey.length - 1]].countOnTime,
-          countLeave: this.courseList[i].schedule.attendance[attKey[attKey.length - 1]].countLeave,
-          date: this.courseList[i].schedule.attendance[attKey[attKey.length - 1]].date,
-        }
-      }
-      this.lastAttendance.push(temp)
+        console.log(this.lastAttendance)
+        //let list = []
+        //list.push(ob)
+        //console.log(list)
+      })
     }
-    console.log(this.lastAttendance)
-  }
+  */
+
 
 
 
@@ -565,8 +557,8 @@ export class DashboardComponent implements OnInit {
   }
 
   buttonOutlineStyle = [
-    'btn-outline-primary','btn-outline-success','btn-outline-danger','btn-outline-warning','btn-outline-info',
-    'btn-outline-primary','btn-outline-success','btn-outline-danger','btn-outline-warning','btn-outline-info'
+    'btn-outline-primary', 'btn-outline-success', 'btn-outline-danger', 'btn-outline-warning', 'btn-outline-info',
+    'btn-outline-primary', 'btn-outline-success', 'btn-outline-danger', 'btn-outline-warning', 'btn-outline-info'
   ];
 
   buttonStyle = [

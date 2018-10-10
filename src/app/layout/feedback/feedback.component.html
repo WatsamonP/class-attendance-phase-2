@@ -3,7 +3,7 @@
     <ul class="navbar-nav mr-auto">
       <li style="font-size:20px">
         <i class="fa fa-star" aria-hidden="true"></i>&nbsp;
-        <b>FEEDBACK</b> 
+        <b>FEEDBACK</b>
         {{ ( courseItem | async)?.id }} : {{ (courseItem | async)?.name }}
       </li>
     </ul>
@@ -15,4 +15,149 @@
 
 <hr>
 
-<app-timeline></app-timeline>
+<div *ngFor="let atten of attendanceList; let i = index">
+  <div style="padding:2px">
+    <div>
+      <button *ngIf="!expandList[i].expanded" (click)="expandedAttendance(i)" type="button" class="btn {{ buttonOutlineStyle[i] }} btn-lg btn-block">
+        <div class="row">
+          <div class="col text-left">
+            <i class="fa fa-calendar-check-o" aria-hidden="true"></i>&nbsp; ครั้งที่ : {{i+1}}
+          </div>
+          <div class="col">
+            {{ atten.date | date: 'mediumDate' }}
+          </div>
+          <div class="col text-right"><i class="fa fa-angle-double-down" aria-hidden="true"></i></div>
+        </div>
+      </button>
+
+      <button *ngIf="expandList[i].expanded" (click)="expandedAttendance(i)" type="button" class="btn {{ buttonStyle[i] }} btn-lg btn-block">
+        <div class="row">
+          <div class="col text-left">
+            <i class="fa fa-calendar-check-o" aria-hidden="true"></i>&nbsp; ครั้งที่ : {{i+1}}
+          </div>
+          <div class="col">
+            {{ atten.date | date: 'mediumDate' }}
+          </div>
+          <div class="col text-right"><i class="fa fa-angle-double-up" aria-hidden="true"></i></div>
+        </div>
+      </button>
+
+      <div *ngIf="expandList[i].expanded">
+        <div style="padding:3px"></div>
+        <div class="row">
+          <div class="col">
+            <div class="card {{ borderStyle[i] }}">
+              <div class="card-header text-right {{ classColor[i] }}">
+                จำนวน <b>{{commentList.length}}</b> Feedback
+              </div>
+
+              <div class="row">
+                <div class="col col-sm-8" style="display: block">
+                  <br>
+                  <div *ngIf="commentList.length !== 0">
+                    <canvas baseChart [colors]="radarChartDataColors" [datasets]="radarChartData" [labels]="radarChartLabels"
+                      [chartType]="radarChartType" (chartHover)="chartHovered($event)" (chartClick)="chartClicked($event)"></canvas>
+                  </div>
+                  <div *ngIf="commentList.length == 0" class="text-center text-danger">
+
+                  </div>
+                </div>
+                <div class="col col-sm-4" style="text-align: center">
+                  <br>
+                  <div *ngIf="commentList.length !== 0">
+                    <canvas baseChart [colors]="pieChartDataColors" height="220px" [data]="pieChartData" [labels]="pieChartLabels"
+                      [chartType]="pieChartType" (chartHover)="chartHovered($event)" (chartClick)="chartClicked($event)">
+                    </canvas>
+                  </div>
+                  <div *ngIf="commentList.length == 0" class="text-center text-danger">
+
+                  </div>
+                </div>
+              </div>
+
+              <!---->
+
+              <div *ngIf="commentList.length == 0" class="card-body text-danger text-center">
+                Not found Feedback
+              </div>
+              <div *ngIf="commentList.length !== 0" class="card-body">
+                <div style="padding:5px" class="text-left">
+                  <div ngbDropdown class="input-group-append">
+                    <button type="button" class="btn btn-outline-secondary" ngbDropdownToggle>
+                      {{ selectedFilter }}
+                    </button>
+                    <div ngbDropdownMenu>
+                      <button class="dropdown-item btn-sm">
+                        <a class="dropdown-item" (click)="filterComments('all')">All</a>
+                      </button>
+                      <button class="dropdown-item btn-sm">
+                        <a class="dropdown-item" (click)="filterComments('positive')">Positive</a>
+                      </button>
+                      <button class="dropdown-item btn-sm">
+                        <a class="dropdown-item" (click)="filterComments('neutral')">Neutral</a>
+                      </button>
+                      <button class="dropdown-item btn-sm">
+                        <a class="dropdown-item" (click)="filterComments('negative')">Negative</a>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <ul class="timeline">
+                  <li *ngFor="let list of filterComment; let i = index">
+
+                    <div *ngIf="list.classLabel == 'negative'" class="timeline-badge danger">
+                      <i class="fa fa-minus" aria-hidden="true"></i>
+                    </div>
+                    <div *ngIf="list.classLabel == 'positive'" class="timeline-badge success">
+                      <i class="fa fa-plus" aria-hidden="true"></i>
+                    </div>
+                    <div *ngIf="list.classLabel == 'neutral'" class="timeline-badge warning">
+                      <b style="font-size:90%">OK</b>
+                    </div>
+
+                    <div class="timeline-panel">
+                      <div *ngIf="list.classLabel == 'negative'" class="timeline-body">
+                        <p><img [src]="emojiPath('cry')" width='25px'>&nbsp;&nbsp; {{ list.comment }}</p>
+                        <p>
+                          <small class="text-muted">
+                            <i class="fa fa-calendar" aria-hidden="true"></i>&nbsp;
+                            {{ list.date | date:'medium' }}
+                          </small>
+                        </p>
+                      </div>
+                      <div *ngIf="list.classLabel == 'positive'" class="timeline-body">
+                        <p><img [src]="emojiPath('love')" width='25px'>&nbsp;&nbsp; {{ list.comment }}</p>
+                        <p>
+                          <small class="text-muted">
+                            <i class="fa fa-calendar" aria-hidden="true"></i>&nbsp;
+                            {{ list.date | date:'medium' }}
+                          </small>
+                        </p>
+                      </div>
+
+                      <div *ngIf="list.classLabel == 'neutral'" class="timeline-body">
+                        <p><img [src]="emojiPath('smile')" width='25px'>&nbsp;&nbsp; {{ list.comment }}</p>
+                        <p>
+                          <small class="text-muted">
+                            <i class="fa fa-calendar" aria-hidden="true"></i>&nbsp;
+                            {{ list.date | date:'medium' }}
+                          </small>
+                        </p>
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+              <!---->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--div style="display: block">
+  <canvas baseChart [datasets]="radarChartData" [labels]="radarChartLabels" [chartType]="radarChartType" (chartHover)="chartHovered($event)"
+    (chartClick)="chartClicked($event)"></canvas>
+</div-->

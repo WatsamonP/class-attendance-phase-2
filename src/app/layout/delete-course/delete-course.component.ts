@@ -41,16 +41,11 @@ export class DeleteCourseComponent implements OnInit {
 
   }
 
-
-
-
   public onClickDelete(course_id) {
     this.openConfirmDeleteAlert(this.deleteCourse, course_id);
-    //console.log('แน่ใจว่าจะลบ');
   }
 
   onDelete(course_id) {
-    //console.log('ลบแล้วน๊าาา');
     this.afDb.object(`users/${this.authUid}/course/${course_id}`).remove()
   }
 
@@ -60,7 +55,7 @@ export class DeleteCourseComponent implements OnInit {
 
   openConfirmDeleteAlert(content, course) {
     this.deleteMessage = {id: course.id, name: course.name}
-    this.modalService.open(content, { size: 'sm' }).result.then((result) => {
+    this.modalService.open(content).result.then((result) => {
       this.toastr.success(
         course.id + " : " + course.name, 'ลบรายวิชา'
       );

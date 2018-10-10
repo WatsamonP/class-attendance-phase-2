@@ -1,4 +1,4 @@
-<html>
+<!--html>
 
 <head>
   <link href="https://fonts.googleapis.com/css?family=Arthiti:300,700" rel="stylesheet">
@@ -12,7 +12,14 @@
 </body>
 
 </html>
-<br>
+<br-->
+
+<nav class="navbar navbar-light bg-light">
+  <a class="navbar-brand" href="#">
+    <i class="fa fa-book" aria-hidden="true"></i>&nbsp;สร้างรายวิชาใหม่</a>
+</nav>
+
+<hr>
 
 <div class="container" [@routerTransition]>
   <form autocomplete="off" novalidate class="login-form" [formGroup]="addCourseForm" (ngSubmit)="onClickSave()">
@@ -26,7 +33,8 @@
                 รหัสวิชา
               </div>
             </div>
-            <input type="text" formControlName="id" class="form-control" placeholder="รหัสวิชา" aria-label="Input group example" aria-describedby="btnGroupAddon">
+            <input type="text" formControlName="id" class="form-control" placeholder="รหัสวิชา" aria-label="Input group example"
+              aria-describedby="btnGroupAddon">
             <!-- Valid -->
             <div *ngIf="id.value==null" class="input-group-append"></div>
             <div *ngIf="id.value!=null && id.errors" class="input-group-append">
@@ -56,7 +64,8 @@
                 ชื่อวิชา
               </div>
             </div>
-            <input type="text" formControlName="name" class="form-control" placeholder="ชื่อวิชา" aria-label="Input group example" aria-describedby="btnGroupAddon">
+            <input type="text" formControlName="name" class="form-control" placeholder="ชื่อวิชา" aria-label="Input group example"
+              aria-describedby="btnGroupAddon">
             <!-- Valid -->
             <div *ngIf="name.value==null" class="input-group-append"></div>
             <div *ngIf="name.value!=null && name.errors" class="input-group-append">
@@ -123,12 +132,12 @@
       </div>
 
       <br>
-      <div class="bg-light athiti" style="font-size:12;padding: 8px">
+      <div class="bg-light" style="font-size:12;padding: 8px">
         <i class="fa fa-list" aria-hidden="true"></i>&nbsp;<b>รายการเก็บคะแนน</b>
       </div>
       <div class="text-danger" style="font-size:8 ;padding: 8px">
         <i class="fa fa-warning" aria-hidden="true"></i>&nbsp;
-          สงวนคำว่า <b>"Attendance"</b> สำหรับการเช็คชื่อเข้าเรียนเท่านั้น (สามารถตรวจสอบสถานะเข้าเรียนได้)
+        สงวนคำว่า <b>"Attendance"</b> สำหรับการเช็คชื่อเข้าเรียนเท่านั้น (สามารถตรวจสอบสถานะเข้าเรียนได้)
         <br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;นอกเหนือจากนี้ จะบันทึกคะแนนธรรมดา
       </div>

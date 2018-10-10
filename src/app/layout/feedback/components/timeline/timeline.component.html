@@ -1,18 +1,17 @@
 <div class="card-body">
   <ul class="timeline">
-    <li *ngFor="let list of list; let i = index">
+    <li *ngFor="let list of commentList; let i = index">
       <div *ngIf="list.classLabel == 'negative'" class="timeline-badge danger">
         <i class="fa fa-minus" aria-hidden="true"></i>
       </div>
       <div *ngIf="list.classLabel == 'positive'" class="timeline-badge success">
         <i class="fa fa-plus" aria-hidden="true"></i>
       </div>
+      <div *ngIf="list.classLabel == 'neutral'" class="timeline-badge warning">
+        OK
+      </div>
       <div class="timeline-panel">
-        <!--div class="timeline-heading">
-          <h4 class="timeline-title">Lorem ipsum dolor</h4>
-          <p><small class="text-muted"><i class="fa fa-clock-o"></i> 11 hours ago via Twitter</small>
-          </p>
-        </div-->
+
         <div *ngIf="list.classLabel == 'negative'" class="timeline-body">
           <p><img [src]="emojiPath('cry')" width='25px'>&nbsp;&nbsp; {{ list.comment }}</p>
           <p>
@@ -23,6 +22,16 @@
           </p>
         </div>
         <div *ngIf="list.classLabel == 'positive'" class="timeline-body">
+          <p><img [src]="emojiPath('love')" width='25px'>&nbsp;&nbsp; {{ list.comment }}</p>
+          <p>
+            <small class="text-muted">
+              <i class="fa fa-calendar" aria-hidden="true"></i>&nbsp;
+              {{ list.date | date:'medium' }}
+            </small>
+          </p>
+        </div>
+
+        <div *ngIf="list.classLabel == 'neutral'" class="timeline-body">
           <p><img [src]="emojiPath('smile')" width='25px'>&nbsp;&nbsp; {{ list.comment }}</p>
           <p>
             <small class="text-muted">
@@ -33,30 +42,5 @@
         </div>
       </div>
     </li>
-    <!--li class="timeline-inverted">
-      <div class="timeline-badge warning"><i class="fa fa-credit-card"></i>
-      </div>
-      <div class="timeline-panel">
-        <div class="timeline-heading">
-          <h4 class="timeline-title">Lorem ipsum dolor</h4>
-        </div>
-        <div class="timeline-body">
-          <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</p>
-        </div>
-      </div>
-    </li>
-    <li>
-      <div class="timeline-badge danger"><i class="fa fa-bomb"></i>
-      </div>
-      <div class="timeline-panel">
-        <div class="timeline-heading">
-          <h4 class="timeline-title">Lorem ipsum dolor</h4>
-        </div>
-        <div class="timeline-body">
-          <p>Lorem ipsum dolor sit amet, consectetur adipisicingmagni commodi quisquam.</p>
-        </div>
-      </div>
-    </li-->
-
   </ul>
 </div>

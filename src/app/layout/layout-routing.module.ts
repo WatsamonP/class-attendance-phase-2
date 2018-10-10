@@ -22,6 +22,7 @@ const routes: Routes = [
             { path: 'course/:id/:event', loadChildren: './course/course.module#CourseModule' },
             { path: 'course/:id/:event/:group', loadChildren: './course/course.module#CourseModule' },
             { path: 'feedback/:id', loadChildren: './feedback/feedback.module#FeedbackModule' },
+            { path: 'feedback/:id/:index', loadChildren: './feedback/feedback.module#FeedbackModule' },
         ]
     }
 ];

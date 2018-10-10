@@ -66,7 +66,7 @@
           </td>
           <ng-template #found>
             <td style="width:80px; text-align: center">
-              {{ student.score[dE.id] }}
+              {{ student.score[dE.id] | number: '1.2-2'}}
             </td>
           </ng-template>
           <ng-template #notFound>
@@ -145,7 +145,7 @@
       <input type="text" class="form-control text-center" placeholder="{{ gradeList[4]-1 }}" disabled>
     </div>
 
-    <div class="input-group" style="padding:10px;">
+    <div class="input-group" style="padding:10px">
       <div class="input-group-prepend">
         <span class="input-group-text bg-danger text-light" style="width:50px" id=""><b style="font-size: 110%">D</b></span>
       </div>

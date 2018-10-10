@@ -92,7 +92,8 @@
           <i class="fa fa-pencil-square-o" aria-hidden="true" style="height: 20px;"></i>&nbsp;แก้ไขรายวิชา
         </button>
         &nbsp;
-        <button type="button" class="btn btn-outline-danger" (click)="c('Close click', exportExcel())">
+        <button type="button" class="btn btn-outline-danger" (click)="c('Close click', openSm(exportExcel))">
+          <!--button type="button" class="btn btn-outline-danger" (click)="c('Close click', exportExcel())"-->
           <img src="assets/icon/excel_icon.svg" style="height: 20px;" /> นำออกข้อมูล
         </button>
       </div>
@@ -211,7 +212,8 @@
               <i class="fa fa-address-card" aria-hidden="true"></i>&nbsp;รหัสนักศึกษา
             </div>
           </div>
-          <input type="text" formControlName="id" class="form-control" placeholder="B58xxxxx" aria-label="Input group example" aria-describedby="btnGroupAddon">
+          <input type="text" formControlName="id" class="form-control" placeholder="B58xxxxx" aria-label="Input group example"
+            aria-describedby="btnGroupAddon">
           <!-- Valid -->
           <div *ngIf="insertStdId.value==null" class="input-group-append"></div>
           <div *ngIf="insertStdId.value!=null && insertStdId.errors" class="input-group-append">
@@ -339,7 +341,8 @@
                   ชื่อวิชา
                 </div>
               </div>
-              <input type="text" formControlName="name" class="form-control" placeholder="ชื่อวิชา" aria-label="Input group example" aria-describedby="btnGroupAddon">
+              <input type="text" formControlName="name" class="form-control" placeholder="ชื่อวิชา" aria-label="Input group example"
+                aria-describedby="btnGroupAddon">
             </div>
             <!-- จำนวนกลุ่มเรียน -->
             <!--div class="input-group" style="padding-bottom: 10px">
@@ -378,8 +381,8 @@
                   อักษรย่อ
                 </div>
               </div>
-              <input type="text" formControlName="abbreviation" class="form-control" placeholder="อักษรย่อรายวิชา" aria-label="Input group example"
-                aria-describedby="btnGroupAddon">
+              <input type="text" formControlName="abbreviation" class="form-control" placeholder="อักษรย่อรายวิชา"
+                aria-label="Input group example" aria-describedby="btnGroupAddon">
             </div>
           </div>
 
@@ -395,8 +398,8 @@
                     {{dE.name}}
                   </div>
                 </div>
-                <input type="number" formControlName="{{dE.percentKey}}" class="form-control" placeholder="ตัวเลขเท่านั้น" aria-label="Input group example"
-                  aria-describedby="btnGroupAddon">
+                <input type="number" formControlName="{{dE.percentKey}}" class="form-control" placeholder="ตัวเลขเท่านั้น"
+                  aria-label="Input group example" aria-describedby="btnGroupAddon">
               </div>
             </div>
           </div>
@@ -419,7 +422,8 @@
         </p>
       </div>
       <div class="col text-right">
-        <button type="button" class="btn btn-warning" (click)="onClickUpdateCourseData()">บันทึกการตั้งค่า</button>
+        <!--button type="button" class="btn btn-warning" (click)="onClickUpdateCourseData()">บันทึกการตั้งค่า</button-->
+        <button type="button" class="btn btn-warning" (click)="c('Close click', onClickUpdateCourseData())">บันทึกการตั้งค่า</button>
       </div>
     </div>
   </div>
@@ -464,7 +468,7 @@
 <ng-template #warningAlert let-c="close" let-d="dismiss">
   <div class="modal-header bg-warning">
     <h5 class="modal-title" id="modal-basic-title">
-      <i class="fa fa-warning" aria-hidden="true"></i>&nbsp;&nbsp;WARNING
+      <i class="fa fa-warning" aria-hidden="true"></i>&nbsp;&nbsp;
     </h5>
     <button type="button" class="close" aria-label="Close" (click)="d('Close click')">
       <span aria-hidden="true">&times;</span>
@@ -499,13 +503,61 @@
     <p *ngIf="countUploadStudentProgress !== 0">
       กรุณารอสักครู่ เมื่อสำเร็จแล้วระบบจะทำการ Reload อีกครั้ง
     </p>
-    <button *ngIf="countUploadStudentProgres !== studentList.length" type="button" class="btn btn-outline-warning" (click)="letCreateEventSlot()">CREATE</button>
+    <button *ngIf="countUploadStudentProgres !== studentList.length" type="button" class="btn btn-outline-warning"
+      (click)="letCreateEventSlot()">CREATE</button>
 
     <!--button *ngIf="countUploadStudentProgress == studentList.length" type="button" class="btn btn-outline-success" (click)="c('Close click')">ปิด</button-->
   </div>
 
 </ng-template>
 
+<ng-template #exportExcel let-c="close" let-d="dismiss">
+  <div class="modal-body text-center">
+    <div *ngIf="groupParam == 'all'">นำออกข้อมูล "ทุกกลุ่ม"</div>
+    <div *ngIf="groupParam != 'all'">นำออกข้อมูล "กลุ่มเรียนที่ groupParam"</div>
+
+    <div class="text-mute"> เลือกกลุ่มที่ต้องการนำออกข้อมูลได้จาก ปุ่ม
+      <div class="input-group input-group-sm mb-3">
+        <div class="input-group-prepend ">
+          <span class="input-group-text" id="inputGroup-sizing-sm">GROUP </span>
+        </div>
+        <div class="input-group-append">
+          <button type="button" class="btn btn-outline-secondary" disabled>xxxxx</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card-footer text-center">
+    <button type="button" class="btn btn-outline-danger" (click)="c('Close click', exportExcel())">
+      <img src="assets/icon/excel_icon.svg" style="height: 20px;" /> นำออกข้อมูล
+    </button>
+  </div>
+</ng-template>
+
+<ng-template #deleteCourse let-c="close" let-d="dismiss">
+  <div class="modal-header bg-warning">
+    <h5 class="modal-title" id="modal-basic-title">
+      <i class="fa fa-warning" aria-hidden="true"></i>&nbsp;&nbsp;WARNING
+    </h5>
+    <button type="button" class="close" aria-label="Close" (click)="d('Close click')">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body text-center">
+    <h6>ต้องการลบรายวิชา </h6>
+    {{ deleteMessage.id }} : {{ deleteMessage.name }}
+    <hr>
+    <p class="text-danger">เมื่อลบแล้วจะไม่สามารถกู้คืนได้</p>
+  </div>
+  <div class="modal-footer row">
+    <div class="col text-left">
+      <button type="button" class="btn btn-outline-warning" (click)="d('Close click')">ยกเลิก</button>
+    </div>
+    <div class="col text-right">
+      <button type="button" class="btn btn-warning" (click)="c('Close click')">ตกลง</button>
+    </div>
+  </div>
+</ng-template>
 
 <!--div class="input-group" style="padding-bottom: 10px">
       <div class="input-group-prepend">
