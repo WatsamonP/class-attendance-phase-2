@@ -513,22 +513,34 @@
 
 <ng-template #exportExcel let-c="close" let-d="dismiss">
   <div class="modal-body text-center">
-    <div *ngIf="groupParam == 'all'">นำออกข้อมูล "ทุกกลุ่ม"</div>
-    <div *ngIf="groupParam != 'all'">นำออกข้อมูล "กลุ่มเรียนที่ groupParam"</div>
-
-    <div class="text-mute"> เลือกกลุ่มที่ต้องการนำออกข้อมูลได้จาก ปุ่ม
-      <div class="input-group input-group-sm mb-3">
-        <div class="input-group-prepend ">
-          <span class="input-group-text" id="inputGroup-sizing-sm">GROUP </span>
-        </div>
-        <div class="input-group-append">
-          <button type="button" class="btn btn-outline-secondary" disabled>xxxxx</button>
+    <div *ngIf="groupParam == 'all'">นำออกข้อมูล "<b>ทุกกลุ่ม</b>"</div>
+    <div *ngIf="groupParam != 'all'">นำออกข้อมูล "<b>กลุ่มเรียนที่ {{ groupParam }}</b>"</div>
+    <hr>
+    <div class="row">
+      <div class="col center-block text-muted">
+        เลือกกลุ่มที่ต้องการนำออกข้อมูลได้จาก
+        <!--div class="text-center input-group input-group-sm">
+          <div class="input-group-prepend ">
+            <span class="input-group-text" id="inputGroup-sizing-sm">GROUP </span>
+          </div>
+          <div class="input-group-append">
+            <button type="button" class="btn btn-outline-secondary" disabled>xxxxxx</button>
+          </div>
+        </div-->
+  
+        <div class="btn-group btn-group-toggle" data-toggle="buttons">
+          <label class="btn btn-sm btn-secondary disabled" aria-disabled="true">
+            <input type="radio" name="options" id="option1" autocomplete="off" > GROUP
+          </label>
+          <label class="btn btn-sm btn-outline-secondary disabled" aria-disabled="true">
+            <input type="radio" name="options" id="option2" autocomplete="off" > xxxxxx
+          </label>
         </div>
       </div>
     </div>
   </div>
   <div class="card-footer text-center">
-    <button type="button" class="btn btn-outline-danger" (click)="c('Close click', exportExcel())">
+    <button type="button" class="btn btn-outline-danger" (click)="c('Close click', onClickExportExcel())">
       <img src="assets/icon/excel_icon.svg" style="height: 20px;" /> นำออกข้อมูล
     </button>
   </div>

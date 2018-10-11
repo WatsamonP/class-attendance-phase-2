@@ -40,8 +40,8 @@
     </div>
   </div>
   <div class="col text-right">
-    <ngb-pagination class="d-flex justify-content-end" size="sm" [collectionSize]="numberOfAllPage" [(page)]="numberOfPage" [maxSize]="5"
-      [rotate]="true" [ellipses]="false" [boundaryLinks]="true">
+    <ngb-pagination class="d-flex justify-content-end" size="sm" [collectionSize]="numberOfAllPage" [(page)]="numberOfPage"
+      [maxSize]="5" [rotate]="true" [ellipses]="false" [boundaryLinks]="true">
     </ngb-pagination>
   </div>
 </div>
@@ -135,7 +135,27 @@
         <td style="width:100px; text-align: center">{{student.id}}</td>
         <td style="width:270px; text-align: center">{{student.name}}</td>
         <td *ngIf="isShowGroup" class="white" style="width:50px; text-align: center">{{student.group}}</td>
-        <td *ngIf="isShowCountMiss" class="text-danger white" style="width:50px; text-align: center">{{missedClassCount[j]}}</td>
+
+        <ng-container *ngIf="isShowCountMiss && eventParam == 'attendance'">
+          <td *ngIf="missedClassCount[j] >= missScoreYell" class="text-danger missScoreYell" style="width:50px; text-align: center">
+            {{missedClassCount[j]}}
+          </td>
+          <td *ngIf="missedClassCount[j] >= missScoreOrange" class="text-danger missScoreOrange" style="width:50px; text-align: center">
+            {{missedClassCount[j]}}
+          </td>
+          <td *ngIf="missedClassCount[j] >= missScoreRed" class="text-danger missScoreRed" style="width:50px; text-align: center">
+            {{missedClassCount[j]}}
+          </td>
+          <td *ngIf="missedClassCount[j] < missScoreYell" class="text-danger white" style="width:50px; text-align: center">
+            {{missedClassCount[j]}}
+          </td>
+
+        </ng-container>
+        <td *ngIf="isShowCountMiss && eventParam !== 'attendance'" class="text-danger white" style="width:50px; text-align: center">
+          {{missedClassCount[j]}}
+        </td>
+
+
         <!-------------------------------------------------------------------------------------->
         <!-- Schedule Result-->
         <ng-container *ngFor="let key of objectKeys(student[eventParam]); let k = index">
@@ -143,15 +163,17 @@
           </td>
           <!-- Normal Score for !Attendance-->
           <ng-template #normalScore>
-            <td *ngIf="(student[eventParam][key].score >= 1) && (eventParam!=='attendance'); else ontimeScore" class="white" style="width:60px ;text-align: center">
+            <td *ngIf="(student[eventParam][key].score >= 1) && (eventParam!=='attendance'); else ontimeScore" class="white"
+              style="width:60px ;text-align: center">
               <!--form *ngIf="isFixScore && fixScoreIndex==k" style="width:80px" autocomplete="off" novalidate [formGroup]="changeScoreForm">
                 <fieldset [disabled]="formDisabled">
                   <input type="text" class="form-control text-center" formControlName="changeScore" placeholder="{{ student[eventParam][key].score }}"
                     (keyup.enter)="onChangeScore(student,key,k)">
                 </fieldset>
               </form-->
-              <input *ngIf="isFixScore && fixScoreIndex==k" type="text" class="form-control text-center" style="width:80px" (keyup.enter)="onChangeScore(student,key,k,j)"
-                placeholder="{{ student[eventParam][key].score }}" [(ngModel)]="changeScore[j]">
+              <input *ngIf="isFixScore && fixScoreIndex==k" type="text" class="form-control text-center" style="width:80px"
+                (keyup.enter)="onChangeScore(student,key,k,j)" placeholder="{{ student[eventParam][key].score }}"
+                [(ngModel)]="changeScore[j]">
 
               <div *ngIf="!isFixScore">{{ student[eventParam][key].score }}</div>
               <div *ngIf="isFixScore && fixScoreIndex !== k">{{ student[eventParam][key].score }}</div>
@@ -159,7 +181,8 @@
           </ng-template>
           <!--template show ontimeScore if Attendance-->
           <ng-template #ontimeScore>
-            <td *ngIf="(student[eventParam][key].score >= 1) && (eventParam=='attendance'); else lateScore" class="green" style="width:60px ;text-align: center">
+            <td *ngIf="(student[eventParam][key].score >= 1) && (eventParam=='attendance'); else lateScore" class="green"
+              style="width:60px ;text-align: center">
               <!--form *ngIf="isFixScore && fixScoreIndex==k" style="width:80px" autocomplete="off" novalidate [formGroup]="changeScoreForm">
                 <fieldset [disabled]="formDisabled">
                   <input type="text" class="form-control text-center" formControlName="changeScore" placeholder="{{ student[eventParam][key].score }}"
@@ -172,7 +195,8 @@
           </ng-template>
           <!--template show lateScore if Attendance-->
           <ng-template #lateScore>
-            <td *ngIf="(student[eventParam][key].score == 0.5) && (eventParam=='attendance'); else missScore" class="yell" style="width:60px ;text-align: center">
+            <td *ngIf="(student[eventParam][key].score == 0.5) && (eventParam=='attendance'); else missScore" class="yell"
+              style="width:60px ;text-align: center">
               <!--form *ngIf="isFixScore && fixScoreIndex==k" style="width:80px" autocomplete="off" novalidate [formGroup]="changeScoreForm">
                 <fieldset [disabled]="formDisabled">
                   <input type="text" class="form-control text-center" formControlName="changeScore" placeholder="{{ student[eventParam][key].score }}"
@@ -186,8 +210,9 @@
           <!--template show score = 0-->
           <ng-template #missScore>
             <td *ngIf="student[eventParam][key].score == 0;" class="red text-danger" style="width:60px;text-align: center">
-              <input *ngIf="isFixScore && fixScoreIndex==k" type="text" class="form-control text-center" style="width:80px" (keyup.enter)="onChangeScore(student,key,k,j)"
-                placeholder="{{ student[eventParam][key].score }}" [(ngModel)]="changeScore[j]">
+              <input *ngIf="isFixScore && fixScoreIndex==k" type="text" class="form-control text-center" style="width:80px"
+                (keyup.enter)="onChangeScore(student,key,k,j)" placeholder="{{ student[eventParam][key].score }}"
+                [(ngModel)]="changeScore[j]">
               <!--form *ngIf="isFixScore && fixScoreIndex==k" style="width:80px" autocomplete="off" novalidate [formGroup]="changeScoreForm">
                 <fieldset [disabled]="formDisabled">
                   <input type="text" class="form-control text-center" formControlName="changeScore" placeholder="{{ student[eventParam][key].score }}"

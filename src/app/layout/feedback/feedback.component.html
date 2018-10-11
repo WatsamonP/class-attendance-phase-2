@@ -56,7 +56,7 @@
                   <br>
                   <div *ngIf="commentList.length !== 0">
                     <canvas baseChart [colors]="radarChartDataColors" [datasets]="radarChartData" [labels]="radarChartLabels"
-                      [chartType]="radarChartType" (chartHover)="chartHovered($event)" (chartClick)="chartClicked($event)"></canvas>
+                      [options]="raderOptions" [chartType]="radarChartType" (chartHover)="chartHovered($event)" (chartClick)="chartClicked($event)"></canvas>
                   </div>
                   <div *ngIf="commentList.length == 0" class="text-center text-danger">
 
@@ -83,7 +83,7 @@
               <div *ngIf="commentList.length !== 0" class="card-body">
                 <div style="padding:5px" class="text-left">
                   <div ngbDropdown class="input-group-append">
-                    <button type="button" class="btn btn-outline-secondary" ngbDropdownToggle>
+                    <button type="button" class="btn btn-secondary" ngbDropdownToggle>
                       {{ selectedFilter }}
                     </button>
                     <div ngbDropdownMenu>

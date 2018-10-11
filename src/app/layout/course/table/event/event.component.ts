@@ -86,6 +86,9 @@ export class EventComponent implements OnInit {
     { score: 4, class: 'orange' },
     { score: 6, class: 'red' },
   ];
+  missScoreYell: Number = 2;
+  missScoreOrange: Number = 4;
+  missScoreRed: Number = 6;
   studentDeleteMessage: String;
 
   constructor(

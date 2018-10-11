@@ -258,6 +258,17 @@ export class FeedbackComponent implements OnInit {
     }
   ];
 
+  public raderOptions: any = {
+    responsive: true,
+    maintainAspectRatio: true,
+    scale: {
+      ticks: {
+        beginAtZero: true,
+        max: 5
+      }
+    }
+  };
+
   public pieChartDataColors: any[] = [
     {
       backgroundColor: ["#3f903f", "#f8bc44", "#d9534f"]

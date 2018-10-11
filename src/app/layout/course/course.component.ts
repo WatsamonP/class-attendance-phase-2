@@ -546,7 +546,7 @@ export class CourseComponent implements OnInit {
     }
   }
 
-  public exportExcel() {
+  public onClickExportExcel() {
     console.log('นำข้อมูลออก')
     //this._excelService.exportAsExcelFile([],'sample')
     //console.log(this._exportService.
