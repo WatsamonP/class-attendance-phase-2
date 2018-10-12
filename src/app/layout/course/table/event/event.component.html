@@ -137,18 +137,19 @@
         <td *ngIf="isShowGroup" class="white" style="width:50px; text-align: center">{{student.group}}</td>
 
         <ng-container *ngIf="isShowCountMiss && eventParam == 'attendance'">
-          <td *ngIf="missedClassCount[j] >= missScoreYell" class="text-danger missScoreYell" style="width:50px; text-align: center">
+          <td *ngIf="missedClassCount[j] < 3" class="text-dark white" style="width:50px; text-align: center">
             {{missedClassCount[j]}}
           </td>
-          <td *ngIf="missedClassCount[j] >= missScoreOrange" class="text-danger missScoreOrange" style="width:50px; text-align: center">
+          <td *ngIf="missedClassCount[j] >= 3 && missedClassCount[j] < 4" class="text-dark missScoreYell" style="width:50px; text-align: center">
             {{missedClassCount[j]}}
           </td>
-          <td *ngIf="missedClassCount[j] >= missScoreRed" class="text-danger missScoreRed" style="width:50px; text-align: center">
+          <td *ngIf="missedClassCount[j] >= 4 && missedClassCount[j] < 6" class="text-dark missScoreOrange" style="width:50px; text-align: center">
             {{missedClassCount[j]}}
           </td>
-          <td *ngIf="missedClassCount[j] < missScoreYell" class="text-danger white" style="width:50px; text-align: center">
+          <td *ngIf="missedClassCount[j] >= 6" class="text-dark missScoreRed" style="width:50px; text-align: center">
             {{missedClassCount[j]}}
           </td>
+          
 
         </ng-container>
         <td *ngIf="isShowCountMiss && eventParam !== 'attendance'" class="text-danger white" style="width:50px; text-align: center">
