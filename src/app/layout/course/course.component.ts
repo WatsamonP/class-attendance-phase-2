@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, ViewEncapsulation, ViewChild } from '@angular/core';
+import { Component, OnInit, Input, ViewEncapsulation, ViewChild, TemplateRef } from '@angular/core';
 import { EventComponent } from './table/event/event.component'
 import { Router, ParamMap, ActivatedRoute, } from '@angular/router';
 import { Observable } from 'rxjs';
@@ -241,8 +241,9 @@ export class CourseComponent implements OnInit {
       this.afDb.object(`users/${this.authUid}/course/${this.courseParam}`).update(obj)
     }
 
-    this.toastr.success('กรุณารอ Reload สักครู่', 'บันทึกการตั้งค่าสำเร็จ');
-    setTimeout(() => { location.reload() }, 2000);
+    this.toastr.success('', 'บันทึกการตั้งค่าสำเร็จ');
+    //this.toastr.success('กรุณารอ Reload สักครู่', 'บันทึกการตั้งค่าสำเร็จ');
+    //setTimeout(() => { location.reload() }, 3000);
   }
 
 
@@ -545,7 +546,7 @@ export class CourseComponent implements OnInit {
     }
   }
 
-  public exportExcel() {
+  public onClickExportExcel() {
     console.log('นำข้อมูลออก')
     //this._excelService.exportAsExcelFile([],'sample')
     //console.log(this._exportService.
