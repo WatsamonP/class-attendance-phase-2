@@ -41,6 +41,7 @@ export class ExcelService {
   scheduleList: any;
   scheduleKeyList: any;
   percentList: any;
+  gradeList: any;
 
 
   constructor() { }
@@ -53,6 +54,7 @@ export class ExcelService {
     this.courseDetail = json[0];
     this.groupParam = json[4];
     this.percentList = json[5];
+    this.gradeList = json[6];
     console.log(json)
     if(this.groupParam == 'all'){
       this.groupName = 'AllGroup';
@@ -186,6 +188,7 @@ export class ExcelService {
     let key = Object.keys(this.percentList);
     let sKey = Object.keys(this.students);
     let totalScore = [];
+    let count = 0;
     for (var i = 0; i < key.length; i++) {
       let Column = this.percentList[key[i]].event + '[ ' + this.percentList[key[i]].percent + '% ]';
       let eventId = this.percentList[key[i]].event;
@@ -240,6 +243,46 @@ export class ExcelService {
         //list.push(studentSchedule)
         list.push(student)
       }
+      count++;
+    }
+    if(count == key.length){
+        let student = [];
+        let studentScore;
+        for (var s = 0; s < sKey.length; s++) {
+            let grade: String = '';
+            if (totalScore[s] >= Number(this.gradeList.A)) {
+              grade = 'A'
+            } else if (totalScore[s] >= Number(this.gradeList.Bp)) {
+              grade = 'B+'
+            } else if (totalScore[s] >= Number(this.gradeList.B)) {
+              grade = 'B'
+            } else if (totalScore[s] >= Number(this.gradeList.Cp)) {
+              grade = 'C+'
+            } else if (totalScore[s] >= Number(this.gradeList.C)) {
+              grade = 'C'
+            } else if (totalScore[s] >= Number(this.gradeList.D)) {
+              grade = 'D+'
+            } else if (totalScore[s] >= Number(this.gradeList.Dp)) {
+              grade = 'D'
+            } else {
+              grade = 'F'
+            }
+            let studentOb = {
+              'รหัสนักศึกษา': this.students[sKey[s]].id,
+              'ชื่อ-นามสกุล': this.students[sKey[s]].name,
+              'กลุ่มเรียน': this.students[sKey[s]].group,
+            };
+            studentScore = { "grade": grade }
+            if (studentOb !== undefined) {
+              let ob = Object.assign(studentOb, studentScore)
+              student.push(ob)
+            }
+        }
+        //console.log(student)
+        if (studentScore !== undefined) {
+          //list.push(studentSchedule)
+          list.push(student)
+        }
     }
     return list;
   }
