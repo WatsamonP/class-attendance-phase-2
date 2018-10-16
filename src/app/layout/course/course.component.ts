@@ -226,7 +226,7 @@ export class CourseComponent implements OnInit {
     this.router.navigate(['/course', course, event, 'all']);
   }
 
-  // เมื่อคลิก บันทึกการตั้งค่า 
+  // เมื่อคลิก บันทึกการตั้งค่า
   public onClickUpdateCourseData() {
     if (this.updateCourseDataForm.invalid) {
       console.log(this.updateCourseDataForm.value)
@@ -323,7 +323,7 @@ export class CourseComponent implements OnInit {
           date: Date(),
         });
     }
-    setTimeout(() => { location.reload() }, 3000);
+    setTimeout(() => { location.reload() }, 2000);
   }
 
   onCreateOtherEvent(authUid, course_id, dateId, eventKey, total) {
@@ -343,7 +343,7 @@ export class CourseComponent implements OnInit {
           date: Date(),
         });
     }
-    setTimeout(() => { location.reload() }, 3000);
+    setTimeout(() => { location.reload() }, 2000);
   }
 
   /*
@@ -383,7 +383,7 @@ export class CourseComponent implements OnInit {
   //  XX       XXXXXXX   XX    XX
   //  XX            XX    XX  XX
   //  XXXXXXX  XXXXXXX      XX
-  // 
+  //
 
   onFileSelect(files: FileList) {
     if (files && files.length > 0) {
@@ -434,7 +434,7 @@ export class CourseComponent implements OnInit {
         if (i == csvArray2d.length - 1)
           //console.log("Upload Successfully")
           this.toastr.success('Please wait for a while', 'Upload Successfully')
-        setTimeout(() => { location.reload() }, 3000);
+        setTimeout(() => { location.reload() }, 2000);
       } else {
         console.log("Upload Failed : Please upload UTF-8 Format")
         this.toastr.error('Please upload UTF-8 Format', 'Upload Failed')
@@ -576,6 +576,7 @@ export class CourseComponent implements OnInit {
 
 
 
+
   // XXXXXXX  XXXXXXX  XXXXXXX  XX    XX    XX       XX  XXXXXXX  XXXXX    XXXXXXX  XX
   // XX   XX  XX   XX  XX       XXX   XX    XXX     XXX  XX   XX  XX   XX  XX   XX  XX
   // XX   XX  XXXXXXX  XXXXXXX  XX X  XX    XX X   X XX  XX   XX  XX   XX  XXXXXXX  XX
@@ -594,6 +595,7 @@ export class CourseComponent implements OnInit {
   }
 
   public openEvent(content) {
+    //this.modalService.open(content);
     this.modalService.open(content, { centered: true });
   }
 

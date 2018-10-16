@@ -14,6 +14,7 @@ export class ExportService {
   scheduleList: any;
   eventList: any;
   percentList: any;
+  gradeList: any;
   tempItem: any;
   course_data: any;;
 
@@ -70,6 +71,13 @@ export class ExportService {
         return events.map(item => item.key);
       });
 
+    this.gradeList = [];
+    this.afDb.object(`users/${this.authUid}/course/${courseParam}/gradeList`).valueChanges()
+      .subscribe(grade => {
+        this.gradeList = grade;
+    });
+
+
     this.tempItem = this.afDb.object(`users/${this.authUid}/course/${courseParam}`).valueChanges();
     this.tempItem.subscribe(item => {
       let eventKey = Object.keys(item.eventList)
@@ -107,7 +115,7 @@ export class ExportService {
 
           if (groupParam == 'all') { // แสดงทุกกลุ่ม
             this.studentList = stds;      // query นศ
-            this.setData(course_data, this.studentList, this.eventList, this.scheduleList, groupParam, this.percentList)
+            this.setData(course_data, this.studentList, this.eventList, this.scheduleList, groupParam, this.percentList, this.gradeList)
           } else {this.data
             let temp: any = stds;
             for (var i = 0; i < stds.length; i++) {
@@ -115,7 +123,7 @@ export class ExportService {
                 this.studentList.push(temp[i])
               }
             }
-            this.setData(course_data, this.studentList, this.eventList, this.scheduleList, groupParam, this.percentList)
+            this.setData(course_data, this.studentList, this.eventList, this.scheduleList, groupParam, this.percentList, this.gradeList)
           }
           return stds.map(item => item.key);
         });
@@ -124,8 +132,8 @@ export class ExportService {
     });
   }
 
-  setData(courseList, studentList, eventList, scheduleList, group, percentList) {
-    let data: any = [courseList,studentList,eventList, scheduleList, group, percentList]
+  setData(courseList, studentList, eventList, scheduleList, group, percentList, gradeList) {
+    let data: any = [courseList,studentList,eventList, scheduleList, group, percentList, gradeList]
     this.exportAsExcelFile(data)
   }
 

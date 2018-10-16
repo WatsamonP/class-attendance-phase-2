@@ -9,6 +9,7 @@ import { isNumber } from 'util';
 import { NgbAlertConfig } from '@ng-bootstrap/ng-bootstrap';
 import { MessageService } from '../../../../shared/services/messageService';
 import { AuthService } from '../../../../shared/services/auth.service'
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-score',
@@ -53,6 +54,7 @@ export class ScoreComponent implements OnInit {
     private _messageService: MessageService,
     private authService: AuthService,
     private modalService: NgbModal,
+    private toastr: ToastrService,
   ) {
     this.authUid = this.authService.currentUserId;
     this.activatedRoute.paramMap.subscribe((params: ParamMap) => {
@@ -208,15 +210,22 @@ export class ScoreComponent implements OnInit {
   }
 
   updateConfigGrade() {
-    this.afDb.object(`users/${this.authUid}/course/${this.courseParam}/gradeList`).update({
-      A: this.gradeList[0],
-      Bp:this.gradeList[1],
-      B: this.gradeList[2],
-      Cp: this.gradeList[3],
-      C: this.gradeList[4],
-      Dp: this.gradeList[5],
-      D: this.gradeList[6]
-    });
+    if( this.gradeList[0] > this.gradeList[1] && this.gradeList[1] > this.gradeList[2] && this.gradeList[2] > this.gradeList[3] && this.gradeList[3] > this.gradeList[4]
+    && this.gradeList[4] > this.gradeList[5] && this.gradeList[5] > this.gradeList[6]){
+      this.afDb.object(`users/${this.authUid}/course/${this.courseParam}/gradeList`).update({
+        A: this.gradeList[0],
+        Bp:this.gradeList[1],
+        B: this.gradeList[2],
+        Cp: this.gradeList[3],
+        C: this.gradeList[4],
+        Dp: this.gradeList[5],
+        D: this.gradeList[6]
+      });
+      this.toastr.success('แก้ไขช่วงคะแนนเรียบร้อยแล้ว', 'สำเร็จ')
+      setTimeout(() => { location.reload() }, 2000);
+    }else{
+      this.toastr.error('ช่วงคะแนนผิดพลาด', 'ผิดพลาด')
+    }
   }
 
   public sendMessageToStudentsName() {
@@ -224,4 +233,3 @@ export class ScoreComponent implements OnInit {
   }
 
 }
-
