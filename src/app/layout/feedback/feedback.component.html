@@ -56,7 +56,8 @@
                   <br>
                   <div *ngIf="commentList.length !== 0">
                     <canvas baseChart [colors]="radarChartDataColors" [datasets]="radarChartData" [labels]="radarChartLabels"
-                      [options]="raderOptions" [chartType]="radarChartType" (chartHover)="chartHovered($event)" (chartClick)="chartClicked($event)"></canvas>
+                      [options]="raderOptions" [chartType]="radarChartType" (chartHover)="chartHovered($event)"
+                      (chartClick)="chartClicked($event)"></canvas>
                   </div>
                   <div *ngIf="commentList.length == 0" class="text-center text-danger">
 
@@ -81,6 +82,51 @@
                 Not found Feedback
               </div>
               <div *ngIf="commentList.length !== 0" class="card-body">
+                <div class="wrapper">
+                  <table class="table">
+                    <thead>
+                      <tr class="text-center">
+                        <th scope="col">
+                          <img [src]="emojiPathPng('crazy-text2')" width='25px'>
+                        </th>
+                        <th scope="col">
+                          <img [src]="emojiPathPng('cry-text2')" width='25px'>
+                        </th>
+                        <th scope="col">
+                          <img [src]="emojiPathPng('dead-text')" width='25px'>
+                        </th>
+                        <th scope="col">
+                          <img [src]="emojiPathPng('cry-smile-text2')" width='25px'>
+                        </th>
+                        <th scope="col">
+                          <img [src]="emojiPathPng('smile-text2')" width='25px'>
+                        </th>
+                        <th scope="col">
+                          <img [src]="emojiPathPng('love-text2')" width='25px'>
+                        </th>
+                        <th scope="col">
+                          <img [src]="emojiPathPng('bored-text')" width='25px'>
+                        </th>
+                        <th scope="col">
+                          <img [src]="emojiPathPng('sleep-text')" width='25px'>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr class="text-center">
+                        <td scope="row">{{feelingCount.count0}}</td>
+                        <td>{{feelingCount.count1}}</td>
+                        <td>{{feelingCount.count2}}</td>
+                        <td>{{feelingCount.count3}}</td>
+                        <td>{{feelingCount.count4}}</td>
+                        <td>{{feelingCount.count5}}</td>
+                        <td>{{feelingCount.count6}}</td>
+                        <td>{{feelingCount.count7}}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
                 <div style="padding:5px" class="text-left">
                   <div ngbDropdown class="input-group-append">
                     <button type="button" class="btn btn-secondary" ngbDropdownToggle>
@@ -117,7 +163,9 @@
 
                     <div class="timeline-panel">
                       <div *ngIf="list.classLabel == 'negative'" class="timeline-body">
-                        <p><img [src]="emojiPath('cry')" width='25px'>&nbsp;&nbsp; {{ list.comment }}</p>
+                        <p><img [src]="emojiPathIndexPng(list)" width='25px'>
+                          &nbsp;&nbsp; {{ list.comment }}
+                        </p>
                         <p>
                           <small class="text-muted">
                             <i class="fa fa-calendar" aria-hidden="true"></i>&nbsp;
@@ -126,7 +174,7 @@
                         </p>
                       </div>
                       <div *ngIf="list.classLabel == 'positive'" class="timeline-body">
-                        <p><img [src]="emojiPath('love')" width='25px'>&nbsp;&nbsp; {{ list.comment }}</p>
+                        <p><img [src]="emojiPathIndexPng(list)" width='25px'>&nbsp;&nbsp; {{ list.comment }}</p>
                         <p>
                           <small class="text-muted">
                             <i class="fa fa-calendar" aria-hidden="true"></i>&nbsp;
@@ -136,7 +184,7 @@
                       </div>
 
                       <div *ngIf="list.classLabel == 'neutral'" class="timeline-body">
-                        <p><img [src]="emojiPath('smile')" width='25px'>&nbsp;&nbsp; {{ list.comment }}</p>
+                        <p><img [src]="emojiPathIndexPng(list)" width='25px'>&nbsp;&nbsp; {{ list.comment }}</p>
                         <p>
                           <small class="text-muted">
                             <i class="fa fa-calendar" aria-hidden="true"></i>&nbsp;

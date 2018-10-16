@@ -9,6 +9,7 @@ import { isNumber } from 'util';
 import { NgbAlertConfig } from '@ng-bootstrap/ng-bootstrap';
 import { MessageService } from '../../shared/services/messageService';
 import { AuthService } from '../../shared/services/auth.service'
+import { format } from 'url';
 
 @Component({
   selector: 'app-feedback',
@@ -31,6 +32,7 @@ export class FeedbackComponent implements OnInit {
   radarChartData: any[];
   filterComment: any;
   selectedFilter: String;
+  feelingCount: any;
 
   constructor(
     private afDb: AngularFireDatabase,
@@ -79,6 +81,29 @@ export class FeedbackComponent implements OnInit {
 
   }
 
+  emojiPathIndexPng(list) {
+    if (list.feeling == 'อยากจะบ้า') {
+      return `assets/reactions/crazy.svg`
+    } else if (list.feeling == 'อยากร้องไห้') {
+      return `assets/reactions/cry.svg`
+    } else if (list.feeling == 'ไม่โอเค') {
+      return `assets/reactions/dead.svg`
+    } else if (list.feeling == 'ยังไหว') {
+      return `assets/reactions/cry-smile.svg`
+    } else if (list.feeling == 'สนุก') {
+      return `assets/reactions/smile.svg`
+    } else if (list.feeling == 'สนุกมาก') {
+      return `assets/reactions/love.svg`
+    } else if (list.feeling == 'น่าเบื่อ') {
+      return `assets/reactions/bored.svg`
+    } else if (list.feeling == 'ง่วง') {
+      return `assets/reactions/sleep.svg`
+    } else {
+      console.log('ERROR')
+    }
+    
+  }
+
   emojiPath(emoji) {
     return `assets/reactions/${emoji}.svg`
   }
@@ -96,7 +121,7 @@ export class FeedbackComponent implements OnInit {
         if (index == i) {
           this.lastExpandIndex = i;
           this.expandList[i].expanded = true;
-          this.getFeedback(i)
+          this.getFeedback(i);
         } else {
           this.expandList[i].expanded = false;
         }
@@ -112,6 +137,7 @@ export class FeedbackComponent implements OnInit {
       if (feedback[attendanceIndex] !== undefined) {
         this.feebackList = feedback[attendanceIndex];
         let number = Object.keys(this.feebackList);
+
         for (var i = 0; i < number.length; i++) {
           if (this.feebackList[number[i]].date !== undefined) {
             let object = {
@@ -124,11 +150,13 @@ export class FeedbackComponent implements OnInit {
             }
             this.commentList.push(object)
           }
-        }
+        } 
+
         if (this.commentList.length !== 0) {
           this.selectedFilter = 'ALL';
           this.filterComment = this.commentList;
           this.setPieChart();
+          this.countFeeling();
         }
       }
       return feedback.map(item => item.key);
@@ -156,7 +184,51 @@ export class FeedbackComponent implements OnInit {
         this.selectedFilter = 'Negative';
       }
     }
+  }
 
+  countFeeling() {
+    let count0 = 0, count1 = 0, count2 = 0, count3 = 0, count4 = 0, count5 = 0, count6 = 0, count7 = 0;
+    //let feelingObject = {};
+    this.feelingCount = {};
+
+    for(var i in this.commentList){
+      let feel = this.commentList[i].feeling;
+      if (feel == 'อยากจะบ้า') {
+        count0++;
+      } else if (feel == 'อยากร้องไห้') {
+        count1++;
+      } else if (feel == 'ไม่โอเค') {
+        count2++;
+      } else if (feel == 'ยังไหว') {
+        count3++;
+      } else if (feel == 'สนุก') {
+        count4++;
+      } else if (feel == 'สนุกมาก') {
+        count5++;
+      } else if (feel == 'น่าเบื่อ') {
+        count6++;
+      } else if (feel == 'ง่วง') {
+        count7++;
+      } else {
+        console.log('ERROR')
+      }
+      this.feelingCount = {
+        count0: count0, count1: count1, count2: count2, count3: count3,
+        count4: count4, count5: count5, count6: count6, count7: count7,
+      }
+    }
+    
+   
+    //this.feelingCount.push(feelingObject);
+    //console.log(this.feelingCount)
+    /*
+    let feel = this.feebackList[number[i]].feeling;
+    
+    console.log(this.feelingCount)
+    
+    
+    
+    */
   }
 
   setPieChart() {
