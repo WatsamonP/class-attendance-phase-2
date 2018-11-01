@@ -13,7 +13,7 @@
   ไม่มีข้อมูลรายการนี้คลิก &nbsp;
   <button type="button" class="btn btn-outline-warning btn-sm" disabled>
     <i class="fa fa-plus" aria-hidden="true"></i>
-  </button>&nbsp; เพื่อทำการเพิ่มรายการ
+  </button>&nbsp; เพื่อทำการเพิ่มรายการ หรือ<b>เพิ่มรายการผ่าน Mobile App</b>
 </ngb-alert>
 
 <div class="row">
@@ -22,7 +22,7 @@
       <div class="input-group-prepend ">
         <span class="input-group-text" id="inputGroup-sizing-sm">GROUP </span>
       </div>
-      <div *ngIf="groupList.length!=1" ngbDropdown class="input-group-append">
+      <div *ngIf="groupList.length!=1 && isNotShowData" ngbDropdown class="input-group-append">
         <button type="button" class="btn btn-outline-secondary" ngbDropdownToggle>{{ studentGroupSelected }}</button>
         <div ngbDropdownMenu>
           <div *ngFor="let gx of groupList">
@@ -31,6 +31,9 @@
             </button>
           </div>
         </div>
+      </div>
+      <div *ngIf="(groupList.length!=1) && (!isNotShowData) && (!zeroStudent)" class="input-group-append">
+        <span class="input-group-text text-muted">All Group</span>
       </div>
       <div *ngIf="groupList.length==1" class="input-group-append">
         <span class="input-group-text text-muted">Group 1
@@ -44,6 +47,38 @@
       [maxSize]="5" [rotate]="true" [ellipses]="false" [boundaryLinks]="true">
     </ngb-pagination>
   </div>
+</div>
+
+<table class="table table-responsive text-dark table-hover" *ngIf="!isNotShowData && (!zeroStudent)">
+  <thead>
+    <tr>
+      <th style="width:70px; text-align: center">#</th>
+      <th style="width:100px; text-align: center">ID</th>
+      <th style="width:270px; text-align: center">ชื่อ-นามสกุล</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let student of studentList; let j = index;">
+      <th scope="row" style="width:70px; text-align: center">
+        <i class="fa fa-trash-o" (click)="onDeleteStudent(student)"></i>&nbsp;{{j+1}}
+      </th>
+      <td style="width:100px; text-align: center">{{student.id}}</td>
+      <td style="width:270px; text-align: center">{{student.name}}</td>
+      <td *ngIf="isShowGroup" class="white" style="width:50px; text-align: center">{{student.group}}</td>
+    </tr>
+</table>
+
+
+<div *ngIf="zeroStudent" class="text-center">
+  <p class="text-danger" style="display: inline">จำนวนนักศึกษาในคลาส 0</p> <br>
+  กรุณาอัพโหลดรายชื่อนักศึกษา คลิก
+  <button type="button" class="btn btn-outline-primary btn-sm" disabled>
+    <i class="fa fa-cogs" aria-hidden="true"></i>
+    &nbsp; Tools
+  </button> แล้ว
+  <button type="button" class="btn btn-outline-success btn-sm" disabled>
+    <i class="fa fa-user-plus" aria-hidden="true" style="height: 20px;"></i>&nbsp;เพิ่มรายชื่อ
+  </button>
 </div>
 
 <table class="table table-responsive text-dark table-hover" *ngIf="isNotShowData">
@@ -113,7 +148,12 @@
       </ng-template>
 
       <th *ngIf="isShowPercent" class="blue" style="width:70px; text-align: center">
-        <button type="button" class="btn btn-outline-primary btn-sm" style="font-size: 14px" placement="top" ngbTooltip="คะแนนเต็ม {{ isShowTotal }} คะแนน">
+        <button *ngIf="eventParam!=='attendance'" type="button" class="btn btn-outline-primary btn-sm" style="font-size: 14px"
+          placement="top" ngbTooltip="คะแนนเต็ม {{ isShowTotal }} คะแนน">
+          {{ percentageConfig[dynamicEvent] }} %
+        </button>
+        <button *ngIf="eventParam=='attendance'" type="button" class="btn btn-outline-primary btn-sm" style="font-size: 14px"
+          placement="top" ngbTooltip="จำนวน {{ isShowTotal }} ครั้ง">
           {{ percentageConfig[dynamicEvent] }} %
         </button>
         <!--div class="text-primary" style="font-size: 14px">
@@ -149,7 +189,7 @@
           <td *ngIf="missedClassCount[j] >= 6" class="text-dark missScoreRed" style="width:50px; text-align: center">
             {{missedClassCount[j]}}
           </td>
-          
+
 
         </ng-container>
         <td *ngIf="isShowCountMiss && eventParam !== 'attendance'" class="text-danger white" style="width:50px; text-align: center">

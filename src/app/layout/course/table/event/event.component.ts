@@ -12,6 +12,7 @@ import { AuthService } from '../../../../shared/services/auth.service'
 import * as moment from 'moment';
 import { ToastrService } from 'ngx-toastr';
 //import { format } from 'path';
+import { CourseComponent } from '../../course.component';
 
 @Component({
   selector: 'app-event',
@@ -90,6 +91,7 @@ export class EventComponent implements OnInit {
   missScoreOrange: Number = 4;
   missScoreRed: Number = 6;
   studentDeleteMessage: String;
+  zeroStudent: boolean;
 
   constructor(
     private afDb: AngularFireDatabase,
@@ -108,6 +110,7 @@ export class EventComponent implements OnInit {
       this.isShowGroup = m.isShowGroup;
       this.isShowPercent = m.isShowPercent;
       this.isShowCountMiss = m.isShowCountMiss;
+      console.log(m.isChange)
     })
     this.activatedRoute.paramMap.subscribe((params: ParamMap) => {
       let cId = params.get('id');
@@ -146,8 +149,23 @@ export class EventComponent implements OnInit {
           setTimeout(() => this.isNotFound = false);
           setTimeout(() => this.isNotFound = true, 6000);
           this.alertConfig.type = 'warning';
-          return false
+
+          //
+          afDb.list(`users/${this.authUid}/course/${cId}/students`).snapshotChanges().map(actions => {
+            return actions.map(action => ({ key: action.key, ...action.payload.val() }));
+          }).subscribe(stds => {
+            this.studentList = stds;
+            if (this.studentList.length == 0) {
+              this.zeroStudent = true;
+              //return false
+            } else {
+              this.zeroStudent = false;
+            }
+            return stds.map(item => item.key);
+          });
+
         } else {
+          this.zeroStudent = false;
           this.isNotShowData = true;
           this.numberOfCol = 5;
           this.numberOfPage = Math.ceil(this.scheduleList.length / this.numberOfCol);
@@ -443,6 +461,13 @@ export class EventComponent implements OnInit {
       .set({
         id: student.id,
       });
+    // บอกว่ามีอัพเดท 
+    this.afDb.object(`users/${this.authUid}/course/${this.courseParam}/eventList/${this.eventParam}`).update({
+      isUpdate: true
+    })
+    this.afDb.object(`users/${this.authUid}/course/${this.courseParam}/eventList/score`).update({
+      isUpdate: true
+    })
   }
 
 
@@ -611,7 +636,7 @@ export class EventComponent implements OnInit {
       );
       console.log('save')
       this.deleteStudent(student.id);
-      
+
     }, (reason) => {
       console.log('ปิด / ยกเลิก')
       this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
@@ -619,7 +644,7 @@ export class EventComponent implements OnInit {
     });
   }
 
-  deleteStudent(student){
+  deleteStudent(student) {
     this.afDb.object(`users/${this.authUid}/course/${this.courseParam}/students/${student}`).remove()
   }
 

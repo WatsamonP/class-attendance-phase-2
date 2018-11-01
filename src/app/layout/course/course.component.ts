@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, ViewEncapsulation, ViewChild, TemplateRef } from '@angular/core';
+import { Component, OnInit, Input, ViewEncapsulation } from '@angular/core';
 import { EventComponent } from './table/event/event.component'
 import { Router, ParamMap, ActivatedRoute, } from '@angular/router';
 import { Observable } from 'rxjs';
@@ -72,6 +72,7 @@ export class CourseComponent implements OnInit {
   //
   isScoreEvent: boolean = false;
   userInsertNewEvent: String;
+  isFirebaseChange: boolean = false;
 
 
   constructor(
@@ -84,10 +85,14 @@ export class CourseComponent implements OnInit {
     private fb: FormBuilder,
     private toastr: ToastrService,
     private _exportService: ExportService,
-    private _excelService: ExcelService
+    private _excelService: ExcelService,
   ) {
     //init auth UID
     this.authUid = this.authService.currentUserId;
+
+    //this.afDb.database().ref('registered').on('value', snapshot => {
+    //  console.log('changed');
+    //})
 
     this.activatedRoute.paramMap.subscribe((params: ParamMap) => {
       let cId = params.get('id');
@@ -96,6 +101,9 @@ export class CourseComponent implements OnInit {
       this.groupParam = String(params.get('group'));
       if (this.eventParam == 'score') {
         this.isScoreEvent = true;
+        this.isShowCountMiss = false;
+        this.isShowGroup = false;
+        this.isShowPercent = false;
       } else {
         this.isScoreEvent = false;
       }
@@ -204,14 +212,17 @@ export class CourseComponent implements OnInit {
     return number == null || number == undefined
   }
 
-  // ส่ง Meddage ไปบอก EventComponent ว่าจะให้แสดงอะไร
+  // ส่ง Message ไปบอก EventComponent ว่าจะให้แสดงอะไร
   public onClickEvent(event) {
     for (var x in this.eventList) {
       if (this.eventList[x].key == event.key) {
         event.isClick = true;
         this.selectedEvent = event;
         this.afDb.object(`users/${this.authUid}/course/${this.courseParam}/eventList/${this.selectedEvent.key}`)
-          .update({ isClick: true })
+          .update({ 
+            isClick: true,
+            isUpdate: false
+          })
         this.messageToEvent(event, this.courseParam)
       } else {
         this.eventList[x].isClick = false;
@@ -564,7 +575,7 @@ export class CourseComponent implements OnInit {
     }
 
     let id = eventInput.toLowerCase();
-    let list = { id: id, name: eventInput, fn: true, isClick: false };
+    let list = { id: id, name: eventInput, fn: true, isClick: false, isUpdate: false };
 
     this.afDb.object(`users/${this.authUid}/course/${this.courseParam}/eventList/${list.id}`)
       .update(list)

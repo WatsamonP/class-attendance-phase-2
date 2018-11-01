@@ -92,6 +92,10 @@ export class AddCourseComponent implements OnInit {
       this.toastr.error('ไม่อนุญาตให้มีช่องว่างในชื่อรายการ','มีช่องว่าง')
       return false;
     }
+    if(eventInput.toLowerCase() == 'attendance'){
+      this.toastr.error('Attendance เป็น คำสงวน','ผิดพลาด')
+      return false;
+    }
     
     let id = eventInput.toLowerCase();
     this.eventList.push(
@@ -115,6 +119,10 @@ export class AddCourseComponent implements OnInit {
 
   // เพิ่ม event เข้าไปใน eventInit // ลบออกจาก eventList
   onClickDisableEvent(event) {
+    if(event.id == 'attendance'){
+      this.toastr.error('จำเป็นต้องมี Attendance','ผิดพลาด')
+      return false;
+    }
     console.log(event)
     event.isSelected = false;
     for (var i = 0; i < this.eventList.length; i++) {
@@ -164,7 +172,13 @@ export class AddCourseComponent implements OnInit {
         console.log('เลือก ' + this.eventList[i].name)
         // Set List
         this.afDb.object(`users/${this.authUid}/course/${val.id}/eventList/${this.eventList[i].id}`)
-          .update({ id: this.eventList[i].id, name: this.eventList[i].name, fn: true, isClick: false })
+          .update({ 
+            id: this.eventList[i].id, 
+            name: this.eventList[i].name, 
+            fn: true, 
+            isClick: false,
+            isUpdate: false
+          })
         // set Percent
         let pString = String('percent'+this.eventList[i].name);
         var obj = {[pString]: 0}

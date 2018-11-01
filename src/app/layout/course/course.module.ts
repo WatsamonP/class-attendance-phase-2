@@ -10,6 +10,7 @@ import { FormsModule, ReactiveFormsModule  } from '@angular/forms';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { EventComponent, ScoreComponent} from './table'
+import { MatBadgeModule } from '@angular/material/badge';
 
 @NgModule({
     imports: [
@@ -18,7 +19,8 @@ import { EventComponent, ScoreComponent} from './table'
       NgbModule.forRoot(),
       UiSwitchModule,
       JwBootstrapSwitchNg2Module,
-      MatProgressBarModule
+      MatProgressBarModule,
+      MatBadgeModule
     ],
     declarations: [CourseComponent,EventComponent, ScoreComponent]
   })
