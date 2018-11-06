@@ -186,17 +186,17 @@ export class ScoreComponent implements OnInit {
     let grade: String = '';
     if (score >= Number(this.gradeList[0])) {
       grade = 'A'
-    } else if (score >= Number(this.gradeList[1])) {
+    } else if (Math.round(score) >= Number(this.gradeList[1])) {
       grade = 'B+'
-    } else if (score >= Number(this.gradeList[2])) {
+    } else if (Math.round(score) >= Number(this.gradeList[2])) {
       grade = 'B'
-    } else if (score >= Number(this.gradeList[3])) {
+    } else if (Math.round(score) >= Number(this.gradeList[3])) {
       grade = 'C+'
-    } else if (score >= Number(this.gradeList[4])) {
+    } else if (Math.round(score) >= Number(this.gradeList[4])) {
       grade = 'C'
-    } else if (score >= Number(this.gradeList[5])) {
+    } else if (Math.round(score) >= Number(this.gradeList[5])) {
       grade = 'D+'
-    } else if (score >= Number(this.gradeList[6])) {
+    } else if (Math.round(score) >= Number(this.gradeList[6])) {
       grade = 'D'
     } else {
       grade = 'F'
@@ -210,21 +210,27 @@ export class ScoreComponent implements OnInit {
   }
 
   updateConfigGrade() {
-    if( this.gradeList[0] > this.gradeList[1] && this.gradeList[1] > this.gradeList[2] && this.gradeList[2] > this.gradeList[3] && this.gradeList[3] > this.gradeList[4]
-    && this.gradeList[4] > this.gradeList[5] && this.gradeList[5] > this.gradeList[6]){
-      this.afDb.object(`users/${this.authUid}/course/${this.courseParam}/gradeList`).update({
-        A: this.gradeList[0],
-        Bp:this.gradeList[1],
-        B: this.gradeList[2],
-        Cp: this.gradeList[3],
-        C: this.gradeList[4],
-        Dp: this.gradeList[5],
-        D: this.gradeList[6]
-      });
-      this.toastr.success('แก้ไขช่วงคะแนนเรียบร้อยแล้ว', 'สำเร็จ')
-      setTimeout(() => { location.reload() }, 2000);
+    if(Number.isInteger(Number(this.gradeList[0])) && Number.isInteger(Number(this.gradeList[1])) && Number.isInteger(Number(this.gradeList[2])) &&
+       Number.isInteger(Number(this.gradeList[3])) && Number.isInteger(Number(this.gradeList[4])) && Number.isInteger(Number(this.gradeList[5])) &&
+       Number.isInteger(Number(this.gradeList[6]))){
+      if( this.gradeList[0] > this.gradeList[1] && this.gradeList[1] > this.gradeList[2] && this.gradeList[2] > this.gradeList[3] && this.gradeList[3] > this.gradeList[4]
+      && this.gradeList[4] > this.gradeList[5] && this.gradeList[5] > this.gradeList[6]){
+        this.afDb.object(`users/${this.authUid}/course/${this.courseParam}/gradeList`).update({
+          A: this.gradeList[0],
+          Bp:this.gradeList[1],
+          B: this.gradeList[2],
+          Cp: this.gradeList[3],
+          C: this.gradeList[4],
+          Dp: this.gradeList[5],
+          D: this.gradeList[6]
+        });
+        this.toastr.success('แก้ไขช่วงคะแนนเรียบร้อยแล้ว', 'สำเร็จ')
+        setTimeout(() => { location.reload() }, 1500);
+      }else{
+        this.toastr.error('ช่วงคะแนนผิดพลาด', 'ผิดพลาด')
+      }
     }else{
-      this.toastr.error('ช่วงคะแนนผิดพลาด', 'ผิดพลาด')
+      this.toastr.error('กรุณาป้อนตัวเลขจำนวนเต็ม', 'ผิดพลาด')
     }
   }
 
